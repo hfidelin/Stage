@@ -14,3 +14,14 @@ Pour ces codes, il est nécessaire d'installer différents package Python :
 * h2tools
 
 Un tutorial est (en cours) disponible dans le rapport de ce stage.
+
+[A COMPLETER]
+
+Il est à noter que pour utiliser * scipy.sparse.linalg.gmres * il faut ajouter un un attribut dans le fichier $ h2matrix.py $. Il faudra ajouter :
+
+```
+def mat_vec(self,x):
+	return self.dot(x)
+```
+
+Afin que * scipy * puisse utiliser un produit matrice-vecteur.

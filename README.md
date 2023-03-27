@@ -1,6 +1,6 @@
 # Mise en place d'un solveur pour matrice $\mathcal{H} ^ 2$
 
-Codes Python réalisés lors de mon stage de master sur la mise enplace d'un solveur pour matrice H2.
+Codes Python réalisés lors de mon stage de master sur la mise enplace d'un solveur pour matrice $\mathcal{H}^2$.
 
 ## Installation de $h2tools$
 
@@ -21,7 +21,7 @@ Un tutorial est (en cours) disponible dans le rapport de ce stage.
 
 ## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
 
-La classe 'H2Matrix' contient déjà un produit scalaire matrice-vecteur nommé $.dot()$. Il est alors intéressant d'étudier l'erreur commis par cette opération pour une matrice aléatoire de taille $N \times N$, et en fonction de $\tau > 0$
+La classe 'H2Matrix' contient déjà un produit scalaire matrice-vecteur nommé \verb+.dot()+. Il est alors intéressant d'étudier l'erreur commise par cette opération pour une matrice aléatoire de taille $N \times N$, et en fonction de $\tau > 0$
 
 
 ![erreur_mat_vec](./Images/Err_Prod_Mat_Vec_log_N.png)

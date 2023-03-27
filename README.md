@@ -17,7 +17,7 @@ Un tutorial est (en cours) disponible dans le rapport de ce stage.
 
 [A COMPLETER]
 
-Il est à noter que pour utiliser * scipy.sparse.linalg.gmres * il faut ajouter un un attribut dans le fichier $ h2matrix.py $. Il faudra ajouter :
+Il est à noter que pour utiliser *scipy.sparse.linalg.gmres* il faut ajouter un un attribut dans le fichier $h2matrix.py$. Il faudra ajouter :
 
 ```
 def mat_vec(self,x):

@@ -21,7 +21,7 @@ Un tutorial est (en cours) disponible dans le rapport de ce stage.
 
 ## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
 
-La classe 'H2Matrix' contient déjà un produit scalaire matrice-vecteur nommé \verb+.dot()+. Il est alors intéressant d'étudier l'erreur commise par cette opération pour une matrice aléatoire de taille $N \times N$, et en fonction de $\tau > 0$
+La classe 'H2Matrix' contient déjà un produit scalaire matrice-vecteur nommé *.dot()*. Il est alors intéressant d'étudier l'erreur commise par cette opération pour une matrice aléatoire de taille $N \times N$, et en fonction de $\tau > 0$, le paramètre de précision de la matrice $\mathcal{H}^2$.
 
 
 ![erreur_mat_vec](./Images/Err_Prod_Mat_Vec_log_N.png)
@@ -30,7 +30,7 @@ On lit alors qu'en choisissant $\tau < 10{-5}$ on obtient l'erreur la plus faibl
 
 ## Solveur itératif de Krylov
 
-La classe 'H2Matrix' étant un format data-sparse, elle ne donne accès qu'à très peu d'information quant à la matrice. Comme on l'a vu plus haut, cette classe embarque un produit matrice-vecteur, néanmoins aucune autre opérations n'est disponible. Il est donc sensé d'utiliser des algorithmes itératifs dans l'objectif de résoudre :
+La classe 'H2Matrix' étant un format data-sparse, elle ne donne accès qu'à très peu d'information quant à la matrice. Comme on l'a vu plus haut, cette classe embarque un produit matrice-vecteur, néanmoins aucune autre opération n'est disponible. Il est donc sensé d'utiliser des algorithmes itératifs dans l'objectif de résoudre :
 
 $$ Ax = b $$
 
@@ -39,7 +39,7 @@ Avec :
 * $b\in\mathbb{R} ^ {N }$ vecteur source 
 * $x\in\mathbb{R} ^ {N }$ vecteur solution
 
-Nous allons nous intéresser aux solveurs itératifs de Krylov, en particulier les algorithmes GMRES car ils ne nécessitent que d'un produit matrice-vecteur pour fonctionner.
+Nous allons nous intéresser aux solveurs itératifs de Krylov, en particulier les algorithmes GMRES car ils ne nécessitent qu'un produit matrice-vecteur pour fonctionner.
 
 Dans un premier temps, utilisons la fonction *scipy.sparse.linalg.gmres* ( ou une de ses variantes *scipy.sparse.linalg.lgmres*) afin de réaliser un tel algorithme.
 

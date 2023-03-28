@@ -48,7 +48,7 @@ La classe 'H2Matrix' contient déjà un produit scalaire matrice-vecteur nommé 
 
 ![erreur_mat_vec](./Images/Err_Prod_Mat_Vec_log_N.png)
 
-On lit alors qu'en choisissant $\tau < 10{-5}$ on obtient l'erreur la plus faible possible. Dans le reste des calculs, on prendra alors $\mathbf{\tau = 10^{-5}}$ 
+On voit alors que l'ordre de l'erreur suit *linéairement* la précision $\tau$. 
 
 ## Solveur itératif de Krylov
 

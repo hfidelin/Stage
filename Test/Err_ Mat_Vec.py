@@ -15,6 +15,7 @@ if __name__ == "__main__":
     start = time.time()
     N_vec = [2000, 3000, 4000, 5000]
     for N in N_vec:
+        print("N =",N)
         ndim = 3
         count = N
         position = np.random.randn(ndim, count)
@@ -41,7 +42,7 @@ if __name__ == "__main__":
         
         #print(f"Temps d'exécution : {time.time() - start}")
         
-        if N == 5000 :
+        if N == 2000 :
             plt.loglog(X_err, X_err, ls=':', label='Ordre 1')
         plt.loglog(X_err, Y_err, label=f"N={N}", linewidth=2)
         plt.title(r"Erreur commise pour $\tilde{y} = \tilde{A} x$")

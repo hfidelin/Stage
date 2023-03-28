@@ -33,7 +33,7 @@ if __name__ == "__main__":
         for t in X_err :
             print(chr(964), f"= {t}")
             A_h2 = mcbh(problem, tau=t, iters=1, verbose=0)
-            A_h2.svdcompress(1e-4)
+            A_h2.svdcompress(t)
             res_h2 = A_h2.dot(X)
             print(np.linalg.norm(res ), np.linalg.norm(res_h2), "\n")
             err = np.linalg.norm(res - res_h2)
@@ -41,7 +41,8 @@ if __name__ == "__main__":
         
         #print(f"Temps d'exécution : {time.time() - start}")
         
-        
+        if N == 5000 :
+            plt.loglog(X_err, X_err, ls=':', label='Ordre 1')
         plt.loglog(X_err, Y_err, label=f"N={N}", linewidth=2)
         plt.title(r"Erreur commise pour $\tilde{y} = \tilde{A} x$")
         plt.xlabel(r"Valeurs de $\tau$")

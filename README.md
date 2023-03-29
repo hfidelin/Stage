@@ -20,9 +20,7 @@ Un tutorial est (en cours) disponible dans le rapport de ce stage.
 
 
 ## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
-# Mise en place d'un solveur pour matrice $\mathcal{H} ^ 2$
 
-Codes Python réalisés lors de mon stage de master sur la mise enplace d'un solveur pour matrice $\mathcal{H}^2$.
 
 ## Installation de $h2tools$
 

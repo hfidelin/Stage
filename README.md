@@ -19,24 +19,9 @@ Un tutoriel est (en cours) disponible dans le rapport de ce stage.
 
 
 
-## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
+## Analyse de l'approximation numérique par matrice $\mathcal{H} ^ 2$
 
-
-## Installation de $h2tools$
-
-Pour ces codes, il est nécessaire d'installer différents package Python :
-
-* pip 
-* numpy
-* numba
-* scipy
-* cython
-* maxvolpy
-* pypropack
-* h2tools
-
-Un tutorial est (en cours) disponible dans le rapport de ce stage.
-
+[A FAIRE]
 
 
 ## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
@@ -82,3 +67,36 @@ $$\| x - \tilde{x} \|_2,~\mathrm{avec}~x\in\mathbf{R} ^ N~ : Ax=b$$
 Ce résultat est peu satisfaisant car pour des matrices de petites taille ($600 \times 600$), l'erreur est déjà de l'ordre de $10^{-1}$.
 
 Il est peut-être envisageable de coder un solveur itératif de Krylov nous-mêmes !
+
+[WORK IN PROGRESS]
+
+
+## Solveur direct
+
+L'article [faire ref] présente un algorithme permettant de résoudre :
+
+$$ \hat{A} x = b $$
+
+Avec :
+* $\hat{A}$ matrice $\mathcal{H} ^ 2 (\mathbb{R} ^ {N \times N})$
+* $b\in\mathbb{R} ^ {N }$ vecteur source 
+* $x\in\mathbb{R} ^ {N }$ vecteur solution
+
+Nous nous proposons alors d'implémenter cette méthode.
+
+### Idée générale
+
+Le but est en réalité de décomposer la matrice dense $A$ :
+
+
+$$ A \approx U S V ^ T$$
+
+Avec :
+* $S$ matrice sparse $\mathbb{R} ^ {N \times N}$
+* $U, V\in\mathbb{R} ^ {N \times N}$ matrices orthogonales.
+
+On peut alors résoudre en posant $x=Sy$ :
+
+$$Sy = U ^ T b$$
+
+L'idée est alors d'obtenir $U, S, T$ via un algorithme itératif menant à la compression de $A$ par des matrices sparses.

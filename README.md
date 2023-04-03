@@ -21,8 +21,20 @@ Un tutoriel est (en cours) disponible dans le rapport de ce stage.
 
 ## Analyse de l'approximation numérique par matrice $\mathcal{H} ^ 2$
 
-[A FAIRE]
+On peut tout d'abord se demander si la package $h2tools$ approche correctement les matrices denses par des matrices $\mathcal{H} ^ 2$. Pour cela, on peut utiliser l'outil mis en place $.diffnorm()" qui, à l'aide d'un autre package, calcul l'erreur en norme de Frobenius :
 
+$$ \| A - \hat{A} \|_F$$
+
+Avec :
+* $A\in\mathcal{M}_N(\mathbb{R})$ matrice dense
+* $\hat{A}$ matrice $\mathcal{H} ^ 2 $ de $A$
+* $N \in \mathbb{N}$ 
+
+On peut alors analyser numériquement cette erreur :
+
+![erreur_approx](./Images/Err_approx.png)
+
+On voit alors que l'erreur en norme Frobenius suit *linéairement* la précision $\tau$.
 
 ## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
 
@@ -59,7 +71,7 @@ Afin que *scipy* puisse utiliser un produit matrice-vecteur.
 
 En faisant varier le nombre de points $N$, on peut alors obtenir l'erreur suivante :
 
-$$\| x - \tilde{x} \|_2,~\mathrm{avec}~x\in\mathbf{R} ^ N~ : Ax=b$$
+$$\| x - \tilde{x} \|_2,~\mathrm{avec}~x\in\mathbb{R} ^ N~ : Ax=b$$
 
 
 ![erreur Krylov](./Images/Err_Krylov.png)
@@ -100,3 +112,15 @@ On peut alors résoudre en posant $x=Sy$ :
 $$Sy = U ^ T b$$
 
 L'idée est alors d'obtenir $U, S, T$ via un algorithme itératif menant à la compression de $A$ par des matrices sparses.
+
+Cet algorithme nécessite la décomposition de $A$ en deux matrices :
+
+$$A = C_0 + F_0$$
+
+Où $C_0$ est la matrice dite proche, et $F_0$ la matrice lointaine :
+
+![decomp](./Images/decomp.png)
+
+La matrice $C_0$ est composée de blocs de la matrice $A$, on peut alors l'extraire directement de la matrice dense. On obtient comme squelette :
+
+![spy_C0](./Images/spy_C0.png)

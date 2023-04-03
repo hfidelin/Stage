@@ -195,7 +195,9 @@ if __name__ == '__main__':
     print(f"\nTemps d'exécution : {time.time() - start}")
     plot = True
     if plot :
-        plt.imshow(C0.toarray())
-        plt.colorbar()
+        plt.spy(C0.toarray())
+        #plt.colorbar()
+        
+        plt.title(f"Squelette de $C_0$ pour $N={N}$")
         plt.show()
     

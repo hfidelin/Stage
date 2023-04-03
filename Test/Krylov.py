@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from functions import init_particules_problem
 from h2tools.mcbh_2 import mcbh
 from h2tools.collections import particles
-from scipy.sparse.linalg import lgmres, gmres, spsolve
+from scipy.sparse.linalg import lgmres, gmres, spsolve, cg
 from scipy.sparse import csc_matrix
 
 def solveur_Krylov(A_h2, b, tol):
@@ -58,7 +58,9 @@ if __name__ == "__main__":
 
         
         #print(f"\nNorme x1 : {np.linalg.norm(x1)}")
-        x2, exitCode = lgmres(A_s, b, atol=1e-8)
+        
+        x2, exitCode = cg(A, b)
+        #x2, exitCode = lgmres(A_s, b, atol=1e-8)
         err = np.linalg.norm(x1 - x2)
         #print(f"\nNorme x2 : {np.linalg.norm(x2)}")
         print("\nErreur :", err)

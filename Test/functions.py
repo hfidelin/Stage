@@ -21,10 +21,10 @@ def init_particules_problem(position, func, block_size=25, full_matrix=False ):
         row = np.arange(N)
         col = row
         A = problem.func(row, col)
-        return problem, tree, A
+        return problem, A
 
     else:
-        return problem, tree
+        return problem
 
 
 def add_sp(vect_row, vect_column, vect_val, r, c, val, N_sp):
@@ -65,12 +65,11 @@ def add_sp_list(vect_row, vect_column, vect_val, r, c, val ):
         
     vect_row.append(r) 
     vect_column.append(c)
-    print(f"\nVal : {val}")
     vect_val.append(val) 
 
 
 
-def extract_close(row, col, i, k, tmp_matrix, vect_row, vect_col, vect_val, N_sp):
+def extract_close(row, col, i, k, tmp_matrix, vect_row, vect_col, vect_val):
     """
     Extraire les sous matrices close dans une matrice sparse
     """
@@ -80,7 +79,6 @@ def extract_close(row, col, i, k, tmp_matrix, vect_row, vect_col, vect_val, N_sp
         for c in col.index[k]:
             val = tmp_matrix[m, n]
             add_sp_list(vect_row, vect_col, vect_val, r, c, val)
-            N_sp += 1
             n += 1
         m += 1
 
@@ -110,7 +108,7 @@ def init_N_vect(problem):
                         N_vect += 1
     return N_vect
 
-def init_C0(problem, A):
+def init_C0(problem, A, plot=False):
     """
     Renvoie la matrice close C0
     """
@@ -119,85 +117,65 @@ def init_C0(problem, A):
     row = problem.row_tree
     row_close = problem.row_close
     col = problem.col_tree
-    col_close = problem.col_close
     row_size = row.level[-1]
-    col_size = col.level[-1]
     row_close_interaction = [[None for j in row_close[i]]
                 for i in range(row_size)]
-    symmetric = problem.symmetric
-    """
-    N_vect = init_N_vect(problem)
-
-    vect_row = np.zeros(N_vect)
-    vect_col = np.zeros(N_vect)
-    vect_val = np.zeros(N_vect)
-    """
-    N_sp = 0
     
     vect_row = []
     vect_col = []
     vect_val = []
 
     for i in range(row_size):
-        print(f"BOUCLE {i} : {N_sp}")
         for j in range(len(row_close[i])):
             if row_close_interaction[i][j] is None:
                 k = row_close[i][j]
                 
                 tmp_matrix = func(row.index[i], col.index[k])
-                #print(f"Sub :\n{tmp_matrix}")
                 extract_close(row, col, i, k, tmp_matrix, 
-                              vect_row, vect_col, vect_val, N_sp)
-            else :
-                N_sp += 1   
+                              vect_row, vect_col, vect_val)
+              
             
-    """
-                row_close_interaction[i][j] = tmp_matrix
-                if symmetric and k != i:
-                    l = row_close[k].index(i)
-                    row_close_interaction[k][l] = tmp_matrix.T
-        if symmetric:
-            col_close_interaction = row_close_interaction
-        else:
-            col_close_interaction = [[None for j in col_close[i]]
-                    for i in range(col_size)]
-            for i in range(col_size):
-                for j in range(len(col_close[i])):
-                    jj = col_close[i][j]
-                    k = row_close[jj].index(i)
-                    if row_close_interaction[jj][k] is not None:
-                        col_close_interaction[i][j] =\
-                                row_close_interaction[jj][k].T
-    """
-    #print(f"Row : {vect_row}")
-    #print(f"Column : {vect_col}")
-    print(f"Final : {vect_val}")
     
-    C0_row = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
-    return C0_row
+    C0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
+    
+    if plot :
+        plt.spy(C0.toarray())
+        plt.title(f"Squelette de $C_0$ pour $N={N}$")
+        plt.show()
+    
+    return C0
 
 
 if __name__ == '__main__':
+    
     start = time.time()
-    N = 50
-    ndim = 3
-    position = np.random.randn(ndim, N)
-
+    N = 100
+    ndim = 1
+    #position = np.random.randn(ndim, N)
+    position = np.linspace(0, 1, N)
+    position = position.reshape((N, ndim))
+    print(position.shape)
     tau = 1e-8
 
     func = particles.inv_distance
-    problem, tree, A = init_particules_problem(position, func, block_size=2, 
+    problem, A = init_particules_problem(position, func, block_size=2, 
                                                full_matrix=True)
     
+    #print(f"\nMatrice dense : \n {A}")
 
-    C0 = init_C0(problem, A)
-    #print(f"C0 :\n {C0.toarray()}")
+    
+    C0 = init_C0(problem, A, plot=False)
+    #print(f"\nC0 : \n {C0.toarray()}")
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+
+    ax1.spy(A)
+      
+    ax2.spy(C0.toarray())
+
+    #plt.title(f'Spy pour N={N}')
+
+    plt.show()
+    
     print(f"\nTemps d'exécution : {time.time() - start}")
-    plot = True
-    if plot :
-        plt.spy(C0.toarray())
-        #plt.colorbar()
-        
-        plt.title(f"Squelette de $C_0$ pour $N={N}$")
-        plt.show()
     

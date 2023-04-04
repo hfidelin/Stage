@@ -21,9 +21,15 @@ Un tutoriel est (en cours) disponible dans le rapport de ce stage.
 
 ## Analyse de l'approximation numérique par matrice $\mathcal{H} ^ 2$
 
-On peut tout d'abord se demander si la package $h2tools$ approche correctement les matrices denses par des matrices $\mathcal{H} ^ 2$. Pour cela, on peut utiliser l'outil mis en place $.diffnorm()" qui, à l'aide d'un autre package, calcul l'erreur en norme de Frobenius :
+On peut tout d'abord se demander si la package $h2tools$ approche correctement les matrices denses par des matrices $\mathcal{H} ^ 2$. On rappelle alors la norme d'opérateur pour : 
 
-$$ \| A - \hat{A} \|_F$$
+$$\| A \| = \underset{{x \neq 0}}{\underset{\|x\| \leq 1}{\sup}} \frac{\|Ax\|}{\|x\|}$$
+
+
+
+Pour cela, on peut utiliser l'outil mis en place $.diffnorm()$ qui, à l'aide d'un autre package, calcul l'erreur :
+
+$$ \| A - \hat{A} \|$$
 
 Avec :
 * $A\in\mathcal{M}_N(\mathbb{R})$ matrice dense
@@ -119,8 +125,11 @@ $$A = C_0 + F_0$$
 
 Où $C_0$ est la matrice dite proche, et $F_0$ la matrice lointaine :
 
-![decomp](./Images/decomp.png)
+
+![decomp](./Images/C0_F0.png)
 
 La matrice $C_0$ est composée de blocs de la matrice $A$, on peut alors l'extraire directement de la matrice dense. On obtient comme squelette :
 
-![spy_C0](./Images/spy_C0.png)
+![decomp](./Images/decomp.png)
+
+On voit bien ici que $C_0$ est bien la matrice composée de blocs non-admissibles (proche de la diagonale), tandis que la matrice $F_0$ est constituée des blocs admissibles.

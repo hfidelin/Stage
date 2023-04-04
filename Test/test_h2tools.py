@@ -32,7 +32,7 @@ def err_h2(N_vec):
     
         #Initialisation du problème H2
         func = particles.inv_distance
-        problem, tree = init_particules_problem(position, func, block_size=20, 
+        problem = init_particules_problem(position, func, block_size=20, 
                                                full_matrix=False)
     
         X_err = [(1e-1 ** i) for i in range(1,15)]
@@ -50,9 +50,9 @@ def err_h2(N_vec):
     plt.loglog(X_err, X_err, ls=':', label='Ordre 1')
     plt.grid()
     plt.legend()
-    plt.title(f"Erreur en norme Frobenius pour N = {N}")
+    plt.title(f"Erreur en norme opérateur pour N = {N}")
     plt.xlabel(r"Valeur de $\tau$")
-    plt.ylabel(r"Erreur $\|\|A-\hat{A} \|\|_F$")
+    plt.ylabel(r"Erreur $\|\|A-\hat{A} \|\|$")
     plt.show()
     
 

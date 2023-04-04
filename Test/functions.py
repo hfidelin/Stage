@@ -108,7 +108,7 @@ def init_N_vect(problem):
                         N_vect += 1
     return N_vect
 
-def init_C0(problem, A, plot=False):
+def init_C0(problem, plot=False):
     """
     Renvoie la matrice close C0
     """
@@ -145,37 +145,99 @@ def init_C0(problem, A, plot=False):
     
     return C0
 
+def init_F0(problem, plot=False):
+    """
+    Renvoie la matrice far F0
+    """
+
+    func = problem.func
+    row = problem.row_tree
+    row_far = problem.row_far
+    col = problem.col_tree
+    row_size = row.level[-1]
+    row_far_interaction = [[None for j in row_far[i]]
+                for i in range(row_size)]
+    
+    vect_row = []
+    vect_col = []
+    vect_val = []
+
+    for i in range(row_size):
+        for j in range(len(row_far[i])):
+            if row_far_interaction[i][j] is None:
+                k = row_far[i][j]
+                
+                tmp_matrix = func(row.index[i], col.index[k])
+                extract_close(row, col, i, k, tmp_matrix, 
+                              vect_row, vect_col, vect_val)
+              
+            
+    
+    F0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
+    
+    if plot :
+        plt.spy(F0.toarray())
+        plt.title(f"Squelette de $C_0$ pour $N={N}$")
+        plt.show()
+    
+    return F0
+
+
 
 if __name__ == '__main__':
     
     start = time.time()
-    N = 100
+    N = 80
     ndim = 1
     #position = np.random.randn(ndim, N)
     position = np.linspace(0, 1, N)
-    position = position.reshape((N, ndim))
+    position = position.reshape((ndim, N))
     print(position.shape)
     tau = 1e-8
 
     func = particles.inv_distance
-    problem, A = init_particules_problem(position, func, block_size=2, 
+    problem, A = init_particules_problem(position, func, block_size=10, 
                                                full_matrix=True)
     
-    #print(f"\nMatrice dense : \n {A}")
-
     
-    C0 = init_C0(problem, A, plot=False)
-    #print(f"\nC0 : \n {C0.toarray()}")
     
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-
-    ax1.spy(A)
-      
-    ax2.spy(C0.toarray())
-
-    #plt.title(f'Spy pour N={N}')
-
-    plt.show()
+    C0 = init_C0(problem, plot=False)
+    F0 = init_F0(problem, plot=False)
     
     print(f"\nTemps d'exécution : {time.time() - start}")
+    
+    fig = plt.figure()
+    st = fig.suptitle(r'Décomposition $A = C_0 + F_0$', fontsize="x-large")
+
+    ax1 = fig.add_subplot(211)
+    ax1.spy(A)
+    ax1.set_title(r'Matrice dense $A$')
+
+    ax1 = fig.add_subplot(223)
+    ax1.spy(C0.toarray())
+    ax1.set_title(r'$C0$')
+    
+    ax1 = fig.add_subplot(224)
+    ax1.spy(F0.toarray())
+    ax1.set_title(r'$F0$')
+    
+    fig.tight_layout()
+
+    #fig.savefig('decomp.png')
+    plt.show()
+    """
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+
+    ax1.spy(A)
+    ax1.set_title(r'Matrice dense $A$')
+    
+    ax2.spy(C0.toarray())
+    ax2.set_title(r'$C0$')
+
+    ax3.spy(F0.toarray())
+    ax3.set_title(r'$F0$')
+
+    fig.suptitle(r'Décomposition $A = C_0 + F_0$')
+    plt.show()
+    """
     

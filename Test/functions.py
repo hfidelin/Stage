@@ -4,6 +4,7 @@ from h2tools import ClusterTree
 from h2tools import Problem
 from h2tools.collections import particles
 from scipy.sparse import csc_matrix
+from h2tools.mcbh_2 import mcbh
 import time
 
 def init_particules_problem(position, func, block_size=25, full_matrix=False ):
@@ -154,17 +155,17 @@ def init_F0(problem, plot=False):
     row = problem.row_tree
     row_far = problem.row_far
     col = problem.col_tree
-    row_size = row.level[-1]
-    row_far_interaction = [[None for j in row_far[i]]
-                for i in range(row_size)]
+    col_size = row.level[-1]
+    col_far_interaction = [[None for j in row_far[i]]
+                for i in range(col_size)]
     
     vect_row = []
     vect_col = []
     vect_val = []
 
-    for i in range(row_size):
+    for i in range(col_size):
         for j in range(len(row_far[i])):
-            if row_far_interaction[i][j] is None:
+            if col_far_interaction[i][j] is None:
                 k = row_far[i][j]
                 
                 tmp_matrix = func(row.index[i], col.index[k])
@@ -182,30 +183,7 @@ def init_F0(problem, plot=False):
     
     return F0
 
-
-
-if __name__ == '__main__':
-    
-    start = time.time()
-    N = 80
-    ndim = 1
-    #position = np.random.randn(ndim, N)
-    position = np.linspace(0, 1, N)
-    position = position.reshape((ndim, N))
-    print(position.shape)
-    tau = 1e-8
-
-    func = particles.inv_distance
-    problem, A = init_particules_problem(position, func, block_size=10, 
-                                               full_matrix=True)
-    
-    
-    
-    C0 = init_C0(problem, plot=False)
-    F0 = init_F0(problem, plot=False)
-    
-    print(f"\nTemps d'exécution : {time.time() - start}")
-    
+def plot_C0_F0(A, C0, F0):
     fig = plt.figure()
     st = fig.suptitle(r'Décomposition $A = C_0 + F_0$', fontsize="x-large")
 
@@ -225,19 +203,49 @@ if __name__ == '__main__':
 
     #fig.savefig('decomp.png')
     plt.show()
-    """
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-
-    ax1.spy(A)
-    ax1.set_title(r'Matrice dense $A$')
     
-    ax2.spy(C0.toarray())
-    ax2.set_title(r'$C0$')
 
-    ax3.spy(F0.toarray())
-    ax3.set_title(r'$F0$')
+if __name__ == '__main__':
+    
+    start = time.time()
+    N = 5
+    ndim = 1
+    #position = np.random.randn(ndim, N)
+    position = np.linspace(0, 1, N)
+    position = position.reshape((ndim, N))
+    tau = 1e-8
 
-    fig.suptitle(r'Décomposition $A = C_0 + F_0$')
-    plt.show()
-    """
+    func = particles.inv_distance
+    problem, A = init_particules_problem(position, func, block_size=2, 
+                                               full_matrix=True)
+    
+    A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
+    #A_h2.svdcompress(tau=tau)
+    
+    #C0 = init_C0(problem, plot=False)
+    #F0 = init_F0(problem, plot=False)
+    
+    
+    #R = np.array(A_h2.row_transfer, dtype=object)
+    R = A_h2.row_transfer
+    B = A_h2.row_basis
+ 
+    for r in R:
+        print(r)
+        print('\n')
+
+    A_h2.svdcompress(tau=tau)
+
+    print(10 * '-', 'ORTHOGONALISATION', 10 * '-', '\n')
+
+    for r in R:
+        if r is not None:
+            print(r)
+        else:
+            print(r)
+        print('\n')
+
+
+
+    print(f"\nTemps d'exécution : {time.time() - start}")
     

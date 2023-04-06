@@ -119,6 +119,9 @@ $$Sy = U ^ T b$$
 
 L'idée est alors d'obtenir $U, S, T$ via un algorithme itératif menant à la compression de $A$ par des matrices sparses.
 
+
+## Étape 1 : décomposition initiale
+
 Cet algorithme nécessite la décomposition de $A$ en deux matrices :
 
 $$A = C_0 + F_0$$
@@ -128,8 +131,12 @@ Où $C_0$ est la matrice dite proche, et $F_0$ la matrice lointaine :
 
 ![decomp](./Images/C0_F0.png)
 
-La matrice $C_0$ est composée de blocs de la matrice $A$, on peut alors l'extraire directement de la matrice dense. On obtient comme squelette :
+
+Ces deux matrices peuvent s'obtenir via les fonctions implémentées dans $h2tools$. En effet la fonction *problem.func* issue de la classe *Problem* permet de renvoyer des sous-matrices de la matrice dense A. On peut alors obtenir, en utilisant l'index des lignes/colonnes, les sous-matrices de $C_0$ et de $F_0$ : 
 
 ![decomp](./Images/decomp.png)
 
 On voit bien ici que $C_0$ est bien la matrice composée de blocs non-admissibles (proche de la diagonale), tandis que la matrice $F_0$ est constituée des blocs admissibles.
+
+Attention, ne pas calculer la matrice dense $A$ dans son intégralité, seulement par bloc, puis stocker ces blocs dans des matrices SPARSES
+## Étape 2 : obtention des matrices $U_0, V_0$

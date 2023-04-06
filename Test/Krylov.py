@@ -63,8 +63,8 @@ if __name__ == "__main__":
         
         #print(f"\nNorme x1 : {np.linalg.norm(x1)}")
         
-        x_cg, exitCode_cg = cg(A, b)
-        x_gmres, exitCode_gmres = gmres(A, b)
+        x_cg, exitCode_cg = cg(A_s, b)
+        x_gmres, exitCode_gmres = gmres(A_s, b)
         
         #x2, exitCode = lgmres(A_s, b, atol=1e-8)
         err_cg = np.linalg.norm(x1 - x_cg)

@@ -208,7 +208,7 @@ def plot_C0_F0(A, C0, F0):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 5
+    N = 8
     ndim = 1
     #position = np.random.randn(ndim, N)
     position = np.linspace(0, 1, N)
@@ -229,7 +229,9 @@ if __name__ == '__main__':
     #R = np.array(A_h2.row_transfer, dtype=object)
     R = A_h2.row_transfer
     B = A_h2.row_basis
- 
+    tree = problem.row_tree
+    print(tree)
+    """
     for r in R:
         print(r)
         print('\n')
@@ -244,7 +246,7 @@ if __name__ == '__main__':
         else:
             print(r)
         print('\n')
-
+    """
 
 
     print(f"\nTemps d'exécution : {time.time() - start}")

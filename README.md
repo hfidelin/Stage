@@ -1,3 +1,7 @@
+---
+bibliography: reference.bib
+---
+
 # Mise en place d'un solveur pour matrice $\mathcal{H} ^ 2$
 
 Codes Python réalisés lors de mon stage de master sur la mise enplace d'un solveur pour matrice $\mathcal{H}^2$.
@@ -82,16 +86,14 @@ $$\| x - \tilde{x} \|_2,~\mathrm{avec}~x\in\mathbb{R} ^ N~ : Ax=b$$
 
 ![erreur Krylov](./Images/Err_Krylov.png)
 
-Ce résultat est peu satisfaisant car pour des matrices de petites taille ($600 \times 600$), l'erreur est déjà de l'ordre de $10^{-1}$.
+Le calcul de l'erreur a été réalisé sur De très petits systèmes ($N\leq100$) car la fonction $gmres$ de *scipy* ne parvient pas à résoudre un tel problème pour des matrices trop grandes :
 
-Il est peut-être envisageable de coder un solveur itératif de Krylov nous-mêmes !
-
-[WORK IN PROGRESS]
+![GMRES_fail](./Images/GMRES_fail_2.png)
 
 
 ## Solveur direct
 
-L'article [faire ref] présente un algorithme permettant de résoudre :
+L'article [@sushnikova2018simple] [faire ref] présente un algorithme permettant de résoudre :
 
 $$ \hat{A} x = b $$
 

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from functions import init_particules_problem
 from h2tools.mcbh_2 import mcbh
 from h2tools.collections import particles
-from scipy.sparse.linalg import lgmres, gmres, spsolve, cg
+from scipy.sparse.linalg import lgmres, gmres, spsolve, cg, LinearOperator
 from scipy.sparse import csc_matrix
 
 def solveur_Krylov(A_h2, b, tol):
@@ -41,10 +41,11 @@ if __name__ == "__main__":
     np.random.seed(0)
     # Initialisation des paramètres du problème
     start = time.time()
-    N_vec = [100, 150, 200, 250, 300, 350, 400]
-    #N_vec = [50 * i for i in range(1, 33)]
+    #N_vec = [100, 150, 200, 250, 300, 350, 400]
+    N_vec = [100 * i for i in range(1, 9)]
     #N_vec = [1000, 2000, 3000, 4000, 5000]
-    N_vec = [10, 25, 50, 75, 100]
+    #N_vec = [10, 25, 50, 75, 100]
+    #N_vec = [10, 20]
     X = []
     Y_cg = []
     Y_gmres = []
@@ -54,33 +55,32 @@ if __name__ == "__main__":
         position = np.linspace(0, 1, N)
         position = position.reshape((ndim, N))
         tau = 1e-8
-
+        x = np.random.randn(N)
         func = particles.inv_distance
         problem, A = init_particules_problem(position, func, block_size=2, 
                                                full_matrix=True)
-    
+        #print(A)
         A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
         
-        w = 1
-        #A = init_mat(N)
-        #A_s = np.eye(N, N)
-        #A_s = csc_matrix(A)
+        mv = problem.dot
+
+        A_h2 = LinearOperator((N, N), matvec=mv)
 
         b = np.ones(N)
         print('Calcul du x_exact...')
-        x1 = np.linalg.solve(A, b)
+        x_ref = np.linalg.solve(A, b)
 
         
-        #print(f"\nNorme x1 : {np.linalg.norm(x1)}")
         
-        #x_cg, exitCode_cg = cg(A_s, b)
         print('Calcul de x_gmres...')
         x_gmres, exitCode_gmres = gmres(A_h2, b, tol=1e-8)
-        
+        #x_ref, exit_ref = cg(A, b, tol=1e-8)
+        #x_cg, exitCode_full = cg(A_h2, b, tol=1e-8)
         #x2, exitCode = lgmres(A_s, b, atol=1e-8)
         #err_cg = np.linalg.norm(x1 - x_cg)
         print("Calcul de l'erreur")
-        err_gmres = np.linalg.norm(x1 - x_gmres)
+        err_gmres = np.linalg.norm(x_ref - x_gmres)
+        #err_y = np.linalg.norm(y_ref - y_h2)
         #print(f"\nNorme x2 : {np.linalg.norm(x2)}")
         #print(f"CG :\t{exitCode_cg==0}\nGMRES :\t{exitCode_gmres==0} ")
         print(f"GMRES :\t{exitCode_gmres==0} ")
@@ -95,55 +95,10 @@ if __name__ == "__main__":
     plt.loglog(X, Y_gmres, c='r', linewidth=2, label='GMRES')
     plt.loglog(X, X, ls=':', label='Ordre 1')
     plt.grid()
-    #plt.legend()
+    plt.legend()
     plt.show()
 
-    """
-    if N > 400:
-        raise Exception("Taille du problème trop grande, veuillez prendre N < 400")
     
-    for N in N_vec :
-        print(f"\nN = {N}")
-        ndim = 3
-        count = N
-        position = np.random.randn(ndim, count)
-        
-        #Initialisation du problème H2
-        func = particles.inv_distance
-        problem, tree, A = init_particules_problem(position, func, full_matrix=True)
-        
-
-        #Mise en place des matrices étudiée
-
-        #A = init_A(position)                                #Matrice pleine du problème
-        
-        #A_h2 = mcbh(problem, tau=1e-5, iters=0, verbose=0)  #Matrice H2
-        A_h2 = A
-        b = np.ones(N)                                      #Vecteur second membre du système linéaire
-        
-        #Résolution du système linéaire
-
-        tol = 1e-9
-        
-        x1 = np.linalg.solve(A, b)    #Résolution par Numpy pour vérification
-        
-        #Vérification 
-        try:
-            x2 = solveur_Krylov(A_h2, b, tol)
-            Y_err = np.linalg.norm(x1 - x2)
-            #print(f"\nErreur commise par l'approximation :\n{Y_err}\n")
-            X.append(N)
-            Y.append(Y_err)
-        except:
-            continue
-    
-    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$")
-    plt.xlabel("Nombre de points $N$")
-    plt.ylabel(r"Valeur de $\|\|x - \tilde{x} \|\|_2$")
-    plt.loglog(X, Y, c='r', linewidth=2)
-    plt.grid()
-    plt.show()
-    """
     print(f"Temps d'exécution : {time.time() - start}")
 
         

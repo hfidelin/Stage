@@ -27,7 +27,7 @@ Un tutoriel est (en cours) disponible dans le rapport de ce stage.
 
 On peut tout d'abord se demander si la package $h2tools$ approche correctement les matrices denses par des matrices $\mathcal{H} ^ 2$. On rappelle alors la norme d'opérateur pour : 
 
-$$\| A \| = \underset{{x \neq 0}}{\underset{\|x\| \leq 1}{\sup}} \frac{\|Ax\|}{\|x\|}$$
+$$\| A \| = \underset{{x \neq 0}}{\underset{\|x\|_2 \leq 1}{\sup}} \frac{\|Ax\|_2}{\|x\|_2}$$
 
 
 

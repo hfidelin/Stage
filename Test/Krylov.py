@@ -42,9 +42,9 @@ if __name__ == "__main__":
     # Initialisation des paramètres du problème
     start = time.time()
     #N_vec = [100, 150, 200, 250, 300, 350, 400]
-    N_vec = [100 * i for i in range(1, 9)]
+    #N_vec = [100 * i for i in range(1, 9)]
     #N_vec = [1000, 2000, 3000, 4000, 5000]
-    #N_vec = [10, 25, 50, 75, 100]
+    N_vec = [10, 25, 50, 75, 100]
     #N_vec = [10, 20]
     X = []
     Y_cg = []
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         #print(A)
         A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
         
-        mv = problem.dot
+        mv = A_h2.dot
 
         A_h2 = LinearOperator((N, N), matvec=mv)
 
@@ -70,6 +70,9 @@ if __name__ == "__main__":
         print('Calcul du x_exact...')
         x_ref = np.linalg.solve(A, b)
 
+
+        y_ref = A.dot(x)
+        y_h2 = A_h2.matvec(x)
         
         
         print('Calcul de x_gmres...')
@@ -80,25 +83,31 @@ if __name__ == "__main__":
         #err_cg = np.linalg.norm(x1 - x_cg)
         print("Calcul de l'erreur")
         err_gmres = np.linalg.norm(x_ref - x_gmres)
-        #err_y = np.linalg.norm(y_ref - y_h2)
+        err_y = np.linalg.norm(y_ref - y_h2)
         #print(f"\nNorme x2 : {np.linalg.norm(x2)}")
         #print(f"CG :\t{exitCode_cg==0}\nGMRES :\t{exitCode_gmres==0} ")
         print(f"GMRES :\t{exitCode_gmres==0} ")
         X.append(N)
         #Y_cg.append(err_cg)
+        Y_cg.append(err_y)
         Y_gmres.append(err_gmres)
+
+    print(f"Temps d'exécution : {time.time() - start}")
 
     plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$")
     plt.xlabel("Nombre d'inconnu $N$")
     plt.ylabel(r"Valeur de $\|\|x - \tilde{x} \|\|_2$")
     #plt.loglog(X, Y_cg, c='b', linewidth=2, label='CG')
     plt.loglog(X, Y_gmres, c='r', linewidth=2, label='GMRES')
+    plt.loglog(X, Y_cg, c='b', linewidth=2, label='y = Ax')
     plt.loglog(X, X, ls=':', label='Ordre 1')
     plt.grid()
     plt.legend()
     plt.show()
 
+   
+
     
-    print(f"Temps d'exécution : {time.time() - start}")
+    
 
         

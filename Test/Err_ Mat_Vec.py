@@ -26,8 +26,8 @@ if __name__ == "__main__":
         
         A_h2 = mcbh(problem, tau=1e-4, iters=0, verbose=0)
 
-        X = np.zeros(N)
-        X[0] = 1
+        X = np.random.randn(N)
+        
         X_err = [(1e-1 ** i) for i in range(1,15)]
         Y_err_dot = []
         Y_err_matvec = []
@@ -37,7 +37,7 @@ if __name__ == "__main__":
             A_h2 = mcbh(problem, tau=t, iters=1, verbose=0)
             A_h2.svdcompress(t)
             res_h2_dot = A_h2.dot(X)
-            res_h2_matvec = A_h2.matvec(X)
+            res_h2_matvec = A_h2.dot(X)
             #print(np.linalg.norm(res ), np.linalg.norm(res_h2), "\n")
             err_dot = np.linalg.norm(res - res_h2_dot)
             err_matvec = np.linalg.norm(res - res_h2_matvec)

@@ -216,50 +216,17 @@ if __name__ == '__main__':
     tau = 1e-8
 
     func = particles.inv_distance
-    problem, A = init_particules_problem(position, func, block_size=2, 
+    problem, A = init_particules_problem(position, func, block_size=4, 
                                                full_matrix=True)
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     #A_h2.svdcompress(tau=tau)
     
-    C0 = init_C0(problem, plot=False)
-    F0 = init_F0(problem, plot=False)
-    
-    B = C0 + F0
-    
-    B = B.toarray()
-    print(type(B))
-    
-    for i in range(N):
-        for j in range(N):
-            print(A[i, j], B[i, j])
+    far = A_h2.row_interaction
 
-    #R = np.array(A_h2.row_transfer, dtype=object)
-    
-    R = A_h2.row_transfer
-    B = A_h2.row_basis
-    tree = problem.row_tree
-    #print(tree)
-    """
-    for r in R:
-        print(r.shape)
-        print('\n')
-    """
-    #A_h2.svdcompress(tau=tau)
-    """
-    
-    print(10 * '-', 'ORTHOGONALISATION', 10 * '-', '\n')
-    print(f'\nTOTAL SHAPE  = {A_h2.shape}\n\n')
-    for r, b in zip(R, B):
-        if r is not None:
-            print(f'Noeud :{b}\n')
-            print(r)
-        else:
-            print(b)
-            print(r)
-        print('\n')
-    
-    """
+    for r in far:
+        for rr in r:
+            print('\n', rr, '\n')
 
-    print(f"\nTemps d'exécution : {time.time() - start}")
-    
+    print(5 * '\n')
+    print(A)

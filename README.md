@@ -68,27 +68,21 @@ Avec :
 
 Nous allons nous intéresser aux solveurs itératifs de Krylov, en particulier les algorithmes GMRES car ils ne nécessitent qu'un produit matrice-vecteur pour fonctionner.
 
-Dans un premier temps, utilisons la fonction *scipy.sparse.linalg.gmres* ( ou une de ses variantes *scipy.sparse.linalg.lgmres*) afin de réaliser un tel algorithme.
+Dans un premier temps, utilisons la fonction *scipy.sparse.linalg.gmres* ( ou une de ses variantes *scipy.sparse.linalg.lgmres*) afin d'utiliser un tel algorithme.
 
-Il est à noter que pour utiliser ces fonctions il faut rajouter un un attribut dans le fichier $h2matrix.py$. Il faudra ajouter :
+Il est à noter que pour utiliser ces fonctions il faut transformer la matrice au format $\mathcal{H} ^ 2$ en un opérateur linéaire via :
 
 ```
-def mat_vec(self,x):
-	return self.dot(x)
+A_h2 = scipy.sparse.linalg.LinearOperator((N, N), matvec=A_h2.dot)
 ```
 
-Afin que *scipy* puisse utiliser un produit matrice-vecteur.
+Afin que *scipy* puisse l'utiliser pour la fonction $gmres$.
 
 En faisant varier le nombre de points $N$, on peut alors obtenir l'erreur suivante :
 
 $$\| x - \tilde{x} \|_2,~\mathrm{avec}~x\in\mathbb{R} ^ N~ : Ax=b$$
 
-
-![erreur Krylov](./Images/Err_Krylov.png)
-
-Le calcul de l'erreur a été réalisé sur De très petits systèmes ($N\leq100$) car la fonction $gmres$ de *scipy* ne parvient pas à résoudre un tel problème pour des matrices trop grandes :
-
-![GMRES_fail](./Images/GMRES_fail_2.png)
+![erreur GMRES](./Images/Err_GMRES_H2.png)
 
 
 ## Solveur direct

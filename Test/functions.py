@@ -205,28 +205,110 @@ def plot_C0_F0(A, C0, F0):
     plt.show()
     
 
+"""
+def init_far(problem, A_h2, plot=False):
+    
+    #Renvoie la matrice far F0
+    
+    
+    
+    row = problem.row_tree
+    row_far = problem.row_far
+    col = problem.col_tree
+    col_size = row.level[-1]
+    
+    vect_row = []
+    vect_col = []
+    vect_val = []
+
+    for i in range(col_size):
+        for j in range(len(row_far[i])):
+            k = row_far[i][j]
+            print(i, k)   
+            far = A_h2.row_interaction
+            for i in range(len(far)):
+                print(f'i = {i}')
+                print(f'far_i =\n{far[i]}')
+                print(15 * '-')
+    
+            extract_close(row, col, i, k, far, 
+                              vect_row, vect_col, vect_val)
+              
+            
+    
+    F0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
+    
+    if plot :
+        plt.spy(F0.toarray())
+        plt.title(f"Squelette de $C_0$ pour $N={N}$")
+        plt.show()
+    
+    return F0
+    
+"""
+def init_far(problem, A_h2, plot=False):
+    """
+    Initialise la matrice contenant les blocks far
+    """
+    
+    list_far = A_h2.row_interaction
+    list_index = A_h2.row_basis
+    
+    
+    for i in range(len(list_far)):
+        print(f'\n{list_index[i]}\n')
+        for j in range(len(list_far[i])):
+            print(f'{list_far[i][j]}')
+    
 if __name__ == '__main__':
     
     start = time.time()
-    N = 8
+    N = 2 ** 3
     ndim = 1
     #position = np.random.randn(ndim, N)
     position = np.linspace(0, 1, N)
     position = position.reshape((ndim, N))
-    tau = 1e-8
+    tau = 1e-1
 
     func = particles.inv_distance
     problem, A = init_particules_problem(position, func, block_size=4, 
                                                full_matrix=True)
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    #A_h2.svdcompress(tau=tau)
     
+
+    init_far(problem, A_h2)
+    """
     far = A_h2.row_interaction
+    trans = A_h2.row_transfer
+    
+    for r, t in zip(far, trans):
+        try:
+            for rr in r:
+                print('Far :\n')
+                print('\n', rr, '\n')
+                print('Transfer:\n')
+                print('\n', t, '\n')
+        except:
+            print(f'{r, t} is None\n')
+    
+    print(10 * '-', 'ORTHOGONALISATION', 10 * '-')
+    
+    A_h2.svdcompress(tau=tau)
 
-    for r in far:
-        for rr in r:
-            print('\n', rr, '\n')
 
-    print(5 * '\n')
-    print(A)
+    far = A_h2.row_interaction
+    trans = A_h2.row_transfer
+
+    for r, t in zip(far, trans):
+        try:
+            for rr in r:
+                print('Far :\n')
+                print('\n', rr, '\n')
+                print('Transfer:\n')
+                print('\n', t, '\n')
+        except:
+            print(f'{r, t} is None\n')
+    """
+
+    

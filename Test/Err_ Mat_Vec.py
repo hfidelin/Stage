@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from scipy.sparse.linalg import LinearOperator
 from h2tools.collections import particles
 from h2tools import ClusterTree
 from h2tools import Problem
@@ -14,6 +15,7 @@ if __name__ == "__main__":
     
     start = time.time()
     N_vec = [2000, 3000, 4000, 5000]
+    N_vec = [5000]
     for N in N_vec:
         print("N =",N)
         ndim = 3
@@ -36,6 +38,11 @@ if __name__ == "__main__":
             print(chr(964), f"= {t}")
             A_h2 = mcbh(problem, tau=t, iters=1, verbose=0)
             A_h2.svdcompress(t)
+
+            mv = A_h2.dot
+
+            A_h2 = LinearOperator((N, N), matvec=mv)
+
             res_h2_dot = A_h2.dot(X)
             res_h2_matvec = A_h2.dot(X)
             #print(np.linalg.norm(res ), np.linalg.norm(res_h2), "\n")
@@ -48,7 +55,7 @@ if __name__ == "__main__":
         
         if N == 2000 :
             plt.loglog(X_err, X_err, ls=':', label='Ordre 1')
-        #plt.loglog(X_err, Y_err_dot, label=f"N={N}", linewidth=2)
+        plt.loglog(X_err, Y_err_dot, label=f"N={N}", linewidth=2)
         plt.loglog(X_err, Y_err_matvec, label=f"N={N}", linewidth=2)
         plt.title(r"Erreur commise pour $\tilde{y} = \tilde{A} x$")
         plt.xlabel(r"Valeurs de $\tau$")

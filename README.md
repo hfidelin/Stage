@@ -37,7 +37,7 @@ $$ \| A - \hat{A} \|$$
 
 Avec :
 * $A\in\mathcal{M}_N(\mathbb{R})$ matrice dense
-* $\hat{A}$ matrice $\mathcal{H} ^ 2 $ de $A$
+* $\hat{A}$ matrice $\mathcal{H}^2 $ de $A$
 * $N \in \mathbb{N}$ 
 
 On peut alors analyser numériquement cette erreur :
@@ -135,4 +135,23 @@ Ces deux matrices peuvent s'obtenir via les fonctions implémentées dans $h2too
 On voit bien ici que $C_0$ est bien la matrice composée de blocs non-admissibles (proche de la diagonale), tandis que la matrice $F_0$ est constituée des blocs admissibles.
 
 Attention, ne pas calculer la matrice dense $A$ dans son intégralité, seulement par bloc, puis stocker ces blocs dans des matrices SPARSES
+
 ## Étape 2 : obtention des matrices $U_0, V_0$
+
+Afin d'obtenir les matrices $U_0$ et $V_0$, il nous faut les *matrices de  transferts*. Ces sous-matrices s'obtiennent via la manipulation suivante :
+
+```
+tau = 1e-8
+
+A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Inialisation Matrice H2
+
+A_h2.svdcompress(1e-10) #Orthogonalise les matrices de transferts
+
+row_transfer = A_h2.row_transfer
+
+col_transfer = A_h2.col_transfer
+```
+
+*row_transfer* et *row_transfer* sont des listes de liste contenant les matrices de transferts pour chaque noeud du cluster ligne et du cluster colonne. Il reste alors à mettre en place une routine afin de sélectionner uniquement les matrices correspondants aux feuilles des clusters (cette routine serait à améliorer en utilisant directement le cluster).
+
+On obtient alors les matrices suivantes

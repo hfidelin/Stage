@@ -44,7 +44,7 @@ def solve_gmres(N, A, b, x_ref, eps, counter, verbose=False):
 
     print(" -- Resolution GMRES QTT  --- ")
     tr = time.time()
-    x, info = gmres(A, b, tol=eps,restart=restart, maxiter=N, callback=counter)
+    x, info = gmres(A, b, tol=eps,restart=restart, maxiter=300 , callback=counter)
     tr = time.time() - tr
     err = np.linalg.norm(x-x_ref) #/ np.linalg.norm(x_ref)
     if verbose:
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     # Initialisation des paramètres du problème
     start = time.time()
     #N_vec = [100, 150, 200, 250, 300, 350, 400]
-    #N_vec = [500 * i for i in range(1, 9)]
-    N_vec = [50 * i for i in range(1, 22)]
+    N_vec = [500 * i for i in range(1, 9)]
+    #N_vec = [50 * i for i in range(1, 20)]
     #N_vec = [1000, 2000, 3000, 4000, 5000]
     #N_vec = [10, 25, 50, 75, 100]
     #N_vec = [5000]
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         
         func = particles.inv_distance
 
-        problem, A = init_particules_problem(position, func, block_size=2, 
+        problem, A = init_particules_problem(position, func, block_size=25, 
                                                full_matrix=True)
         
         A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
@@ -89,46 +89,31 @@ if __name__ == "__main__":
 
         A_h2 = LinearOperator((N, N), matvec=mv)
 
-        b = np.ones(N)
+        b = np.zeros(N)
+        b[0] = 1
+        b[-1] = 1
 
         count = gmres_counter()
 
         x_ref = np.linalg.solve(A, b)
         x_gmres, err_gmres_full = solve_gmres(N, A, b, x_ref, eps=tau, counter = count)
         x_h2, err_gmres_h2 = solve_gmres(N, A_h2, b, x_ref, eps=tau, counter = count)
-        """
-        y_ref = A.dot(x)
-        y_h2 = A_h2.matvec(x)
+        err_diff = np.linalg.norm(x_gmres - x_h2)
+        print(f'Exemples : {x_gmres[0]}\t{x_h2[0]}\t{x_ref[0]}')
+        print(f'ERREUR : {err_diff}')
         
-        x_full, exitCode = gmres(A, b, tol=1e-8)
-        print('Calcul de x_gmres...')
-        #x_gmres, exitCode_gmres = gmres(A_h2, b, tol=1e-8)
-        #x_ref, exit_ref = cg(A, b, tol=1e-8)
-        x_cg, exitCode_full = cg(A_h2, b, tol=1e-8)
-        #x2, exitCode = lgmres(A_s, b, atol=1e-8)
-        err_cg = np.linalg.norm(x_ref - x_cg)
-        print("Calcul de l'erreur")
-        err_gmres = np.linalg.norm(x_ref - x_full)
-        #err_gmres = np.linalg.norm(x_ref - x_gmres)
-        #err_y = np.linalg.norm(y_ref - y_h2)
-        #print(f"\nNorme x2 : {np.linalg.norm(x2)}")
-        #print(f"CG :\t{exitCode_cg==0}\nGMRES :\t{exitCode_gmres==0} ")
-        #print(f"GMRES :\t{exitCode_gmres==0} ")
-        """
         X.append(N)
-        #Y_cg.append(err_cg)
-        #Y_cg.append(err_y)
-        Y_full.append(err_gmres_full)
-        Y_h2.append(err_gmres_h2)
+        Y_full.append(err_diff)
+        #Y_h2.append(err_gmres_h2)
 
     print(f"Temps d'exécution : {time.time() - start}")
 
-    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b par GMRES$")
+    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$ par GMRES")
     plt.xlabel("Nombre d'inconnu $N$")
     plt.ylabel(r"Valeur de $\|\|x - \tilde{x} \|\|_2$")
     #plt.loglog(X, Y_cg, c='b', linewidth=2, label='CG')
     plt.loglog(X, Y_full, c='r', linewidth=2, label='Full')
-    plt.loglog(X, Y_h2, c='b', linewidth=2, label='H2')
+    #plt.loglog(X, Y_h2, c='b', linewidth=2, label='H2')
     #plt.loglog(X, Y_cg, c='b', linewidth=2, label='y = Ax')
     plt.loglog(X, X, ls=':', label='Ordre 1')
     plt.grid()

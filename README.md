@@ -154,4 +154,20 @@ col_transfer = A_h2.col_transfer
 
 *row_transfer* et *row_transfer* sont des listes de liste contenant les matrices de transferts pour chaque noeud du cluster ligne et du cluster colonne. Il reste alors à mettre en place une routine afin de sélectionner uniquement les matrices correspondants aux feuilles des clusters (cette routine serait à améliorer en utilisant directement le cluster).
 
-On obtient alors les matrices suivantes
+On obtient alors les matrices suivantes :
+
+![U0](./Images/U0_imshow.png)
+
+Étant dans un cas symétrique, on a $U_0 = V_0$.
+
+On peut alors vérifier ces matrices en appliquant la formule :
+
+$$A_1 = U_0 ^T A V_0$$
+
+Puis en observant le squelette de $A_1$ :
+
+![A1](./Images/A1_imshow.png)
+
+Et en le comparant à la représentation de [H2 Solveur] :
+
+![A1_ref](./Images/A1_ref.png)

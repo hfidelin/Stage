@@ -18,13 +18,14 @@ if __name__ == "__main__":
     N_vec = [5000]
     for N in N_vec:
         print("N =",N)
-        ndim = 3
+        ndim = 1
         count = N
         position = np.random.randn(ndim, count)
+        block_size = 25
 
         
         func = particles.inv_distance
-        problem, A = init_particules_problem(position, func, full_matrix=True)
+        problem, L, A = init_particules_problem(position, func, block_size, full_matrix=True)
         
         A_h2 = mcbh(problem, tau=1e-4, iters=0, verbose=0)
 
@@ -37,7 +38,7 @@ if __name__ == "__main__":
         for t in X_err :
             print(chr(964), f"= {t}")
             A_h2 = mcbh(problem, tau=t, iters=1, verbose=0)
-            A_h2.svdcompress(t)
+            #A_h2.svdcompress(t)
 
             mv = A_h2.dot
 

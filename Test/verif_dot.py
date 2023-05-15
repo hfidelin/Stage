@@ -9,12 +9,15 @@ from functions import *
 if __name__ == '__main__':
     
     start = time.time()
-    N_vec = [100, 200, 500, 1000]
+    N_vec = [1000, 2000, 3000]
+    N_vec = [500 * i for i in range(1, 8, 2)]
     for N in N_vec:
+        print(f'N = {N}\n')
         block_size = 50
         ndim = 1
         position = np.linspace(0, 1, N)
         position = position.reshape((ndim, N))
+        position = np.random.randn(ndim, N)
         func = particles.inv_distance
         problem, L, A = init_particules_problem(position, func, block_size=block_size, 
                                                 full_matrix=True)
@@ -25,13 +28,15 @@ if __name__ == '__main__':
         for t in tau_vect:
             print(chr(964), f"= {t}\n")
             A_h2 = mcbh(problem, tau=t, iters=1, verbose=0)
-            A_h2.svdcompress(t)
+            try:
+                A_h2.svdcompress(t)
+            except:
+                pass
             
-            mv = A_h2.dot
-            A_h2_dot = LinearOperator((N, N), matvec=mv)
+            
 
             Y_ref = A.dot(X)
-            Y = A_h2_dot.matvec(X)
+            Y = A_h2.matvec(X)
 
             err_h2 = A_h2.diffnorm()
             err = np.linalg.norm(Y_ref - Y)
@@ -41,29 +46,17 @@ if __name__ == '__main__':
 
             print(60 * '-')
 
-        print(f"Temps d'exécution : {time.time() - start}")
+        
         
         plt.loglog(tau_vect, err_vect, label=f'N = {N}')
-        if N == 100:
+        if N == 500:
             plt.loglog(tau_vect, tau_vect, ls=':', c='b', label='Slope 1')
-        plt.grid()
+        
         plt.legend()
-        plt.title(f"Erreur commise pour produit matrice-vecteur ")
+        plt.title(f"Erreur commise pour produit matrice-vecteur 1D ")
         plt.xlabel(r"Valeurs de $\tau$")
         plt.ylabel(r"Valeurs de $|| y - \tilde{y}||_2$")
-
-        """
-        plt.clf()
         
-        
-        plt.loglog(tau_vect, err_h2_vect, label=f'N = {N}')
-        if N == 100:
-            plt.loglog(tau_vect, tau_vect, ls=':', c='b', label='Slope 1')
-        
-        plt.legend()
-        plt.title(f"Erreur commise par l'approximation $H^2$")
-        plt.xlabel(r"Valeurs de $\tau$")
-        plt.ylabel(r"Valeurs de $| A - \hat{A}|$")
-        """
+    print(f"Temps d'exécution : {time.time() - start}")
     plt.grid()
     plt.show()

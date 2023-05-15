@@ -5,27 +5,34 @@ from h2tools import Problem
 from h2tools.collections import particles
 from scipy.sparse import csc_matrix
 from h2tools.mcbh_2 import mcbh
+import math
 import time
 
-def init_particules_problem(position, func, block_size=25, full_matrix=False ):
+def init_particules_problem(position, func, block_size, full_matrix=False ):
     """
     Initialise un objet Python "Problem" pour un problème symmetrique 
     provenant d'un nuage de point
     """
     ndim, count = position.shape
     N = count
+    tree_size = N
     data = particles.Particles(ndim, count, vertex=position)
-    tree = ClusterTree(data, block_size= block_size)
+    tree = ClusterTree(data, block_size=block_size)
+    L = 0
+    while tree_size > block_size:
+        tree_size = np.ceil(tree_size / 2)
+        L += 1 
+    #L = tree.num_levels
     problem = Problem(func, tree, tree, symmetric=1, verbose=0)
 
     if full_matrix:
         row = np.arange(N)
         col = row
         A = problem.func(row, col)
-        return problem, A
+        return problem, L, A
 
     else:
-        return problem
+        return problem, L
 
 
 def add_sp(vect_row, vect_column, vect_val, r, c, val, N_sp):
@@ -161,12 +168,11 @@ def init_C0(problem, plot=False):
     
     return C0
 
-def init_F0(problem, list_far, row_transfer, col_transfer, plot=False):
+def init_F0(problem, list_far, plot=False):
     """
     Renvoie la matrice far F0
     """
 
-    func = problem.func
     row = problem.row_tree
     row_far = problem.row_far
     col = problem.col_tree
@@ -179,27 +185,9 @@ def init_F0(problem, list_far, row_transfer, col_transfer, plot=False):
     for i in range(col_size):
         for j in range(len(row_far[i])):
             k = row_far[i][j]
-            #V = row_transfer[i][0]
-            #W = col_transfer[i][0]
+
+            S = list_far[i][0]
             
-            S = list_far[i][0]#func(row.index[i], col.index[k])
-            #print(f'V shape :\t{V.shape}')
-            #print(f'S shape :\t{S.shape}')
-            #print(f'W shape :\t{W.shape}')
-            """
-            try:
-                S = V @ S @ W.T
-                print(S)
-            except:
-                print(False)
-            print(20 * '-')
-            #print('Pré S =', S)
-            #S = V @ S @ W.T
-            #print('Post S =',S)
-            if S.shape == ():
-                S = np.array(S)
-            print(S.shape)
-            """
             extract_far(row, col, i, k, S, vect_row, vect_col, vect_val)
             
             
@@ -239,14 +227,13 @@ def plot_C0_F0(A, C0, F0):
     
 
 
-
 def init_list_leaf(row_transfer, col_transfer, Block_size):
     len_row_transfer = len(row_transfer)
     len_col_transfer = len(col_transfer)
 
     row_leaf = []
     col_leaf = []
-
+    
     for i in range(1, len_row_transfer):
         M = col_transfer[i]
         if M.shape == (Block_size, Block_size):
@@ -262,7 +249,7 @@ def init_list_leaf(row_transfer, col_transfer, Block_size):
     return row_leaf, col_leaf
 
 
-def init_U0(N, row_leaf):
+def init_U0(N, row_leaf, Block_size):
     
     vect_row = []
     vect_col = []
@@ -270,13 +257,13 @@ def init_U0(N, row_leaf):
 
     B = len(row_leaf)
     for i in range(B):
-        Block = row_leaf[i]
+        Block = row_leaf[i].T
         I, J = Block.shape
         for ii in range(I):
             for jj in range(J):
                 val = Block[ii,jj]
-                r = i * B_size + ii
-                c = i * B_size + jj
+                r = i * Block_size + ii
+                c = i * Block_size + jj
                 add_sp_list(vect_row, vect_col, vect_val, r, c, val)
         
     U0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
@@ -285,7 +272,7 @@ def init_U0(N, row_leaf):
 
 
 
-def init_V0(N, col_leaf):
+def init_V0(N, col_leaf, Block_size):
 
     vect_row = []
     vect_col = []
@@ -293,13 +280,13 @@ def init_V0(N, col_leaf):
 
     B = len(col_leaf)
     for i in range(B):
-        Block = row_leaf[i]
+        Block = col_leaf[i]
         I, J = Block.shape
         for ii in range(I):
             for jj in range(J):
                 val = Block[ii,jj]
-                r = i * B_size + ii
-                c = i * B_size + jj
+                r = i * Block_size + ii
+                c = i * Block_size + jj
                 add_sp_list(vect_row, vect_col, vect_val, r, c, val)
         
     V0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
@@ -318,31 +305,69 @@ if __name__ == '__main__':
     #position = np.random.randn(ndim, N)
     position = np.linspace(0, 1, N)
     position = position.reshape((ndim, N))
-    tau = 1e-10
-    B_size = 2
+    tau = 1e-1
+    block_size = 4
 
     func = particles.inv_distance
-    problem, A = init_particules_problem(position, func, block_size=B_size, 
+    problem, L, A = init_particules_problem(position, func, block_size=block_size, 
                                                full_matrix=True)
     
+    print(70 * '-')
+    print(f"DONNÉES DU PROBLÈME :")
+    print(f'\nN \t=\t{N}')
+    print(f'\nB_SIZE \t=\t{block_size}')
+    print(f'\nDEPTH \t=\t{L}')
+    print(f'\nTAU \t=\t{tau}')
+    print(70 * '-', '\n')
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    A_h2.svdcompress(1e-10)
+    A_h2.svdcompress(tau)
 
-    far = A_h2.col_interaction
+    row_far = A_h2.row_interaction
+    col_far = A_h2.col_interaction
     col_transfer = A_h2.col_transfer
     row_transfer = A_h2.row_transfer
     row_basis = A_h2.row_basis
+    M  = len(row_transfer)
+    y_test = np.zeros(N)
+    y_test[0] = 1
+    A_verif = []
     
-    
-    row_leaf, col_leaf = init_list_leaf(row_transfer, col_transfer, B_size)
+    for i in range(N):
+        c = np.zeros(N)
+        c[i] = 1
+        A_verif.append(A_h2.dot(c))
 
-    U0 = init_U0(N, row_leaf)
-    V0 = init_V0(N, col_leaf)
-    C0 = init_C0(problem)
-    A1 = U0.T @ A @ V0
+    A_verif = np.array(A_verif)
     
-    plt.imshow(U0.todense())
+    row_leaf, col_leaf = init_list_leaf(row_transfer, col_transfer, block_size)
+
+    C0 = init_C0(problem)
+    F0 = A - C0
+    F1_verif = A_verif - C0
+    F1 = init_F0(problem, row_far)
+    U0 = init_U0(N, row_leaf, block_size)
+    V0 = init_V0(N, col_leaf, block_size)
+    C0 = init_C0(problem)
+    
+    A_test = C0 + U0 @ F1 @ V0.T
+    A1_t = U0.T @ C0 @ V0 + F1 
+    A1_t = A1_t.toarray()
+    A1 = U0.T @ A @ V0
+    A1_h2 = U0.T @ C0 @ V0 #+ F0
+    A1_h2 = A1_h2.todense()
+    diff = A - A_verif
+    print('Erreur matricielle =', np.linalg.norm(diff))
+    
+    plt.imshow(A)
     plt.colorbar()
-    plt.title('Matrice de décomposition $U0$')
+    plt.title('Matrice $A$ assemblée')
     plt.show()
     
+    plt.clf()
+
+    plt.imshow(A_verif)
+    plt.colorbar()
+    plt.title('Matrice $H_2$ vérif')
+    plt.show()
+      
+  

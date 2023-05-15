@@ -64,58 +64,45 @@ if __name__ == "__main__":
     #N_vec = [50 * i for i in range(1, 20)]
     #N_vec = [1000, 2000, 3000, 4000, 5000]
     #N_vec = [10, 25, 50, 75, 100]
-    #N_vec = [5000]
+    N_vec = [500 * i for i in range(1, 14, 2)]
+    ndim = 1
     X = []
-    Y_cg = []
-    Y_h2 = []
-    Y_full = []
+    Y = []
     for N in N_vec:
 
+        X.append(N)
         print(f"\nN = {N}\n")
-
-        ndim = 1
         position = np.linspace(0, 1, N)
         position = position.reshape((ndim, N))
-        tau = 1e-12
+        #position = np.random.randn(ndim, N)
+        tau = 1e-10
         
         func = particles.inv_distance
-
-        problem, A = init_particules_problem(position, func, block_size=25, 
-                                               full_matrix=True)
-        
+    
+        problem, L, A = init_particules_problem(position, func, block_size=25, 
+                                                    full_matrix=True)   
+    
         A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-        
+
         mv = A_h2.dot
-
+        
         A_h2 = LinearOperator((N, N), matvec=mv)
-
-        b = np.zeros(N)
-        b[0] = 1
-        b[-1] = 1
+        b = np.ones(N)
 
         count = gmres_counter()
-
         x_ref = np.linalg.solve(A, b)
-        x_gmres, err_gmres_full = solve_gmres(N, A, b, x_ref, eps=tau, counter = count)
-        x_h2, err_gmres_h2 = solve_gmres(N, A_h2, b, x_ref, eps=tau, counter = count)
-        err_diff = np.linalg.norm(x_gmres - x_h2)
-        print(f'Exemples : {x_gmres[0]}\t{x_h2[0]}\t{x_ref[0]}')
-        print(f'ERREUR : {err_diff}')
-        
-        X.append(N)
-        Y_full.append(err_diff)
-        #Y_h2.append(err_gmres_h2)
+        x, err = solve_gmres(N, A_h2, b, x_ref, eps=tau, counter = count)
+              
+        Y.append(err)
+
 
     print(f"Temps d'exécution : {time.time() - start}")
 
-    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$ par GMRES")
+    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$ par GMRES 1D")
     plt.xlabel("Nombre d'inconnu $N$")
     plt.ylabel(r"Valeur de $\|\|x - \tilde{x} \|\|_2$")
-    #plt.loglog(X, Y_cg, c='b', linewidth=2, label='CG')
-    plt.loglog(X, Y_full, c='r', linewidth=2, label='Full')
-    #plt.loglog(X, Y_h2, c='b', linewidth=2, label='H2')
-    #plt.loglog(X, Y_cg, c='b', linewidth=2, label='y = Ax')
-    plt.loglog(X, X, ls=':', label='Ordre 1')
+    plt.loglog(X, Y, c='b', linewidth=2)
+    plt.loglog(X, X, ls=':', label='Slope 1')
     plt.grid()
     plt.legend()
     plt.show()

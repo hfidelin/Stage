@@ -19,8 +19,8 @@ class gmres_counter(object):
         self.niter = 0
     def __call__(self, rk=None):
         self.niter += 1
-        #if self._disp:
-            #print('iter %3i\trk = %s' % (self.niter, str(rk)))
+        if self._disp:
+            print('iter %3i\trk = %s' % (self.niter, str(rk)))
 
 
 
@@ -59,22 +59,22 @@ if __name__ == "__main__":
     np.random.seed(0)
     # Initialisation des paramètres du problème
     start = time.time()
-    #N_vec = [100, 150, 200, 250, 300, 350, 400]
+    N_vec = [100, 150, 200, 250, 300, 350, 400]
     N_vec = [500 * i for i in range(1, 9)]
     #N_vec = [50 * i for i in range(1, 20)]
     #N_vec = [1000, 2000, 3000, 4000, 5000]
     #N_vec = [10, 25, 50, 75, 100]
-    N_vec = [500 * i for i in range(1, 14, 2)]
-    ndim = 1
+    #N_vec = [500 * i for i in range(1, 14, 2)]
+    ndim = 3
     X = []
     Y = []
     for N in N_vec:
 
         X.append(N)
         print(f"\nN = {N}\n")
-        position = np.linspace(0, 1, N)
-        position = position.reshape((ndim, N))
-        #position = np.random.randn(ndim, N)
+        #position = np.linspace(0, 1, N)
+        #position = position.reshape((ndim, N))
+        position = np.random.randn(ndim, N)
         tau = 1e-10
         
         func = particles.inv_distance
@@ -98,11 +98,10 @@ if __name__ == "__main__":
 
     print(f"Temps d'exécution : {time.time() - start}")
 
-    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$ par GMRES 1D")
+    plt.title(r"Erreur commise pour $\tilde{A} \tilde{x}= b$ par GMRES 3D")
     plt.xlabel("Nombre d'inconnu $N$")
     plt.ylabel(r"Valeur de $\|\|x - \tilde{x} \|\|_2$")
     plt.loglog(X, Y, c='b', linewidth=2)
-    plt.loglog(X, X, ls=':', label='Slope 1')
     plt.grid()
     plt.legend()
     plt.show()

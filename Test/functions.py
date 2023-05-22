@@ -4,7 +4,7 @@ from h2tools import ClusterTree
 from h2tools import Problem
 from h2tools.collections import particles
 from scipy.sparse import csc_matrix
-from h2tools.mcbh_2 import mcbh
+from h2tools.mcbh import mcbh
 import math
 import time
 
@@ -305,7 +305,7 @@ if __name__ == '__main__':
     #position = np.random.randn(ndim, N)
     position = np.linspace(0, 1, N)
     position = position.reshape((ndim, N))
-    tau = 1e-1
+    tau = 1e-9
     block_size = 4
 
     func = particles.inv_distance
@@ -321,53 +321,18 @@ if __name__ == '__main__':
     print(70 * '-', '\n')
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     A_h2.svdcompress(tau)
-
-    row_far = A_h2.row_interaction
-    col_far = A_h2.col_interaction
-    col_transfer = A_h2.col_transfer
-    row_transfer = A_h2.row_transfer
-    row_basis = A_h2.row_basis
-    M  = len(row_transfer)
-    y_test = np.zeros(N)
-    y_test[0] = 1
-    A_verif = []
-    
+    """
+    y_vec =[] 
     for i in range(N):
         c = np.zeros(N)
         c[i] = 1
-        A_verif.append(A_h2.dot(c))
 
-    A_verif = np.array(A_verif)
+        y = A_h2.dot(c)
+        y_vec.append(y)
     
-    row_leaf, col_leaf = init_list_leaf(row_transfer, col_transfer, block_size)
-
-    C0 = init_C0(problem)
-    F0 = A - C0
-    F1_verif = A_verif - C0
-    F1 = init_F0(problem, row_far)
-    U0 = init_U0(N, row_leaf, block_size)
-    V0 = init_V0(N, col_leaf, block_size)
-    C0 = init_C0(problem)
+    A_dot = np.array(y_vec)
     
-    A_test = C0 + U0 @ F1 @ V0.T
-    A1_t = U0.T @ C0 @ V0 + F1 
-    A1_t = A1_t.toarray()
-    A1 = U0.T @ A @ V0
-    A1_h2 = U0.T @ C0 @ V0 #+ F0
-    A1_h2 = A1_h2.todense()
-    diff = A - A_verif
-    print('Erreur matricielle =', np.linalg.norm(diff))
-    
-    plt.imshow(A)
-    plt.colorbar()
-    plt.title('Matrice $A$ assemblée')
-    plt.show()
-    
-    plt.clf()
-
-    plt.imshow(A_verif)
-    plt.colorbar()
-    plt.title('Matrice $H_2$ vérif')
-    plt.show()
+    print(np.linalg.norm(A - A_dot))
+    """
       
   

@@ -7,7 +7,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from functions import init_particules_problem
-from h2tools.mcbh_2 import mcbh
+from h2tools.mcbh import mcbh
 from h2tools.collections import particles
 from scipy.sparse.linalg import lgmres
 

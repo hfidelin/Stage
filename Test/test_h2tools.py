@@ -1,90 +1,66 @@
-"""
-Fonctions permettant de vérifier (de préférence pour des problèmes linéaire
-de petite taille) la validité d'un solveur en passant par un solveur itératif
-de Krylov
-"""
-import numpy as np
-import time
-import matplotlib.pyplot as plt
-from functions import init_particules_problem
-from h2tools.mcbh import mcbh
+# main imports and variables
+
+# make this script work with both Python 2 and Python 3
+from __future__ import print_function, absolute_import, division
+
+# import all necessary modules and set variables
+import os
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+# at first, import predefined functions and dataclass for particles from h2py.collections
 from h2tools.collections import particles
-from scipy.sparse.linalg import lgmres
+# import main container for problem and cluster tree
+from h2tools import Problem, ClusterTree
 
+import numpy as np
 
+# set dimensionality of the problem (ndim), size of the problem (count),
+# desired relative accuracy of far field approximation (tau),
+# number of iterations for MCBH algorithm (iters),
+# whether to hold special submatrices in memory or compute them on demand (onfly),
+# symmetricity of the problem (symmetric),
+# maximum size of leaf node of cluster trees (block_size) and
+# verbosity (verbose)
+ndim = 3
+count = 5000
+tau = 1e-5
+iters = 1
+onfly = 0
+symmetric = 1
+block_size = 20
+verbose = 1
+random_init = 2
 
-def solveur_Krylov(A_h2, b, tol):
+func = particles.inv_distance
 
-    x, exitCode = lgmres(A_h2, b, atol=tol)    #Résolution par itération Krylov
-    
-    print(f"\nConvergence du solveur de Krylov :\n{exitCode == 0}")
-        
-    return x
+#generate data
+# set random seed so that results are repeatable
+np.random.seed(0)
+# generate positions of particles in shape (ndim, count)
+position = np.random.randn(ndim, count)
+# create data object from given positions of particles
+data = particles.Particles(ndim, count, position)
+# initialize cluster tree from data object
+tree = ClusterTree(data, block_size)
+# create main problem object with interaction particles.inv_distance
+problem = Problem(func, tree, tree, symmetric, verbose, None)
 
+# import multicharge approximation method
+from h2tools.mcbh import mcbh
 
-def err_h2(N_vec):
+# build approximation of the matrix with MCBH algorithm
 
-    for N in N_vec :
-        print(f"N = {N}")
-        ndim = 3
-        count = N
-        position = np.random.randn(ndim, count)
-    
-        #Initialisation du problème H2
-        func = particles.inv_distance
-        problem = init_particules_problem(position, func, block_size=20, 
-                                               full_matrix=False)
-    
-        X_err = [(1e-1 ** i) for i in range(1,15)]
-        Y_err = []
-        
-        for t in X_err :
-            print(f"Tau = {t}")
-            A_h2 = mcbh(problem, tau=t, iters=1, verbose=0)  #Matrice H2
-            err = A_h2.diffnorm()
-            Y_err.append(err)
+matrix = mcbh(problem, tau, iters=iters, onfly=onfly, verbose=verbose, random_init=random_init, mpi_comm=None)
+"""
+# check approximation error
+print(matrix.diffnorm(far_only=1))
 
-        plt.loglog(X_err, Y_err, linewidth=2)
-        
-            
-    plt.loglog(X_err, X_err, ls=':', label='Ordre 1')
-    plt.grid()
-    plt.legend()
-    plt.title(f"Erreur en norme opérateur pour N = {N}")
-    plt.xlabel(r"Valeur de $\tau$")
-    plt.ylabel(r"Erreur $\|\|A-\hat{A} \|\|$")
-    plt.show()
-    
+# Compress matrix
+matrix.svdcompress(1e-4, verbose=1)
+print(matrix.diffnorm(far_only=1))
 
+matrix.svdcompress(1e-3, verbose=1)
+print(matrix.diffnorm(far_only=1))
+"""
 
-if __name__ == "__main__":
-
-    np.random.seed(0)
-    # Initialisation des paramètres du problème
-    start = time.time()
-    N = 50
-    N_vec = [2000, 3000, 4000, 5000]
-    N_vec = [5000]
-    err_h2(N_vec)
-    """
-    ndim = 3
-    count = N
-    position = np.random.randn(ndim, count)
-    
-    #Initialisation du problème H2
-    func = particles.inv_distance
-    problem, tree, A = init_particules_problem(position, func, block_size=2, 
-                                               full_matrix=True)
-    
-    #Mise en place des matrices étudiée
-
-    A_h2 = mcbh(problem, tau=1e-4, iters=1, verbose=0)  #Matrice H2
-    
-    print(A_h2.diffnorm())
-    """
-
-    
-    
-    print(f"Temps d'exécution : {time.time() - start}")
-
-    
+print(matrix)

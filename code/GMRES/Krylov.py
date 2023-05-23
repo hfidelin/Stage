@@ -8,6 +8,7 @@ import time
 import matplotlib.pyplot as plt
 from function_GMRES import init_particules_problem, solve_gmres
 from h2tools.mcbh import mcbh
+from scipy.sparse.linalg import LinearOperator
 from h2tools.collections import particles
 
 
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     #N_vec = [1000, 2000, 3000, 4000, 5000]
     #N_vec = [10, 25, 50, 75, 100]
     N_vec = [500 * i for i in range(1, 14, 2)]
-    
+    N_vec =[500, 1000, 1500, 2000, 2500, 3000, 4000, 5000] 
     for ndim in [1, 2, 3]: 
         print(f'DIMENSION = {ndim} ')
         X = []
@@ -41,24 +42,24 @@ if __name__ == "__main__":
         for N in N_vec:
 
             X.append(N)
-            print(f"\nN = {N}\n")
+            print(f"\n{ndim}D : N = {N}\n")
             position = np.random.randn(ndim, N)
-            tau = 1e-8
+            tau = 1e-9
             
             func = particles.inv_distance
         
-            problem, L, A = init_particules_problem(position, func, block_size=50, full_matrix=True)   
+            problem, L, A = init_particules_problem(position, func, block_size=100, full_matrix=True)   
         
             A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-
+            
             mv = A_h2.dot
-            A += 100 * np.eye(N)
-            # A_h2 = LinearOperator((N, N), matvec=mv)
+            
+            A_h2 = LinearOperator((N, N), matvec=mv)
             b = np.ones(N)
 
             count = gmres_counter()
             x_ref = np.linalg.solve(A, b)
-            x, err = solve_gmres(N, A, b, x_ref, eps=1e-8, counter = count)
+            x, err = solve_gmres(N, A, b, x_ref, eps=tau, counter = count)
                 
             Y.append(err)
 
@@ -68,10 +69,10 @@ if __name__ == "__main__":
         
         plt.loglog(X, Y, label=f'{ndim}D', linewidth=2)
 
-    plt.title(f"Erreur solveur GMRES")
+    plt.title("Erreur solveur GMRES")
     plt.xlabel("Nombre d'inconnu $N$")
-    plt.ylabel(r"Valeur de $\|\|x - \tilde{x} \|\|_2$")    
-    plt.ylim((1e-13, 1e4))
+    plt.ylabel(r"Valeur de $\|x - \tilde{x} \|_2$")    
+    plt.ylim((1e-15, 1e4))
     plt.grid()
     plt.legend()
     plt.show()

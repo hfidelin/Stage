@@ -168,7 +168,7 @@ def inv_distance_numba(ndim, vertex1, list1, vertex2, list2, ans):
                 tmp_v = vertex1[k, list1[i]]-vertex2[k, list2[j]]
                 tmp_l += tmp_v*tmp_v
             if tmp_l <= 0:
-                ans[i, j] = 0
+                ans[i, j] = 100_000
             else:
                 ans[i, j] = 1./math.sqrt(tmp_l)
     return ans
@@ -210,7 +210,7 @@ def log_distance_numba(ndim, vertex1, list1, vertex2, list2, ans):
                 tmp_v = vertex1[k, list1[i]]-vertex2[k, list2[j]]
                 tmp_l += tmp_v*tmp_v
             if tmp_l <= 0:
-                ans[i, j] = 0
+                ans[i, j] = 100_000
             else:
                 ans[i, j] = -0.5*math.log(tmp_l)
     return ans

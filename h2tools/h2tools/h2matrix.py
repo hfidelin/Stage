@@ -10,7 +10,6 @@ from maxvolpy.maxvol import maxvol_svd, maxvol_qr
 from .problem import Problem
 import copy
 try:
-    from pypropack import svdp
     from mpi4py import MPI
 except:
     pass

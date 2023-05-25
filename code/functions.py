@@ -5,7 +5,6 @@ from h2tools import Problem
 from h2tools.collections import particles
 from scipy.sparse import csc_matrix
 from h2tools.mcbh import mcbh
-import math
 import time
 
 def init_particules_problem(position, func, block_size, full_matrix=False ):
@@ -270,8 +269,6 @@ def init_U0(N, row_leaf, Block_size):
     return U0
         
 
-
-
 def init_V0(N, col_leaf, Block_size):
 
     vect_row = []
@@ -300,13 +297,12 @@ def init_V0(N, col_leaf, Block_size):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 3
-    ndim = 1
-    #position = np.random.randn(ndim, N)
-    position = np.linspace(0, 1, N)
-    position = position.reshape((ndim, N))
-    tau = 1e-9
-    block_size = 4
+    N = 5000 #2 ** 3
+    ndim = 3
+    position = np.random.randn(ndim, N)
+
+    tau = 1e-6
+    block_size = 100
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -321,6 +317,7 @@ if __name__ == '__main__':
     print(70 * '-', '\n')
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     A_h2.svdcompress(tau)
+    print(A_h2.diffnorm())
     """
     y_vec =[] 
     for i in range(N):

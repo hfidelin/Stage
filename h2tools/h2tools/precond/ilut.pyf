@@ -1,0 +1,176 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module ilut ! in 
+    interface  ! in :ilut
+        subroutine ilut(n,a,ja,ia,lfil,droptol,alu,jlu,ju,iwk,w,jw,ierr) ! in :ilut:ilut.f90
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer :: lfil
+            real*8 :: droptol
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: iwk
+            real*8 dimension(n + 1),depend(n) :: w
+            integer dimension(2 * n),depend(n) :: jw
+            integer :: ierr
+        end subroutine ilut
+        subroutine ilutp(n,a,ja,ia,lfil,droptol,permtol,mbloc,alu,jlu,ju,iwk,w,jw,iperm,ierr) ! in :ilut:ilut.f90
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer :: lfil
+            real*8 :: droptol
+            real*8 :: permtol
+            integer :: mbloc
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: iwk
+            real*8 dimension(n + 1),depend(n) :: w
+            integer dimension(2 * n),depend(n) :: jw
+            integer dimension(2 * n),depend(n) :: iperm
+            integer :: ierr
+        end subroutine ilutp
+        subroutine ilud(n,a,ja,ia,alph,tol,alu,jlu,ju,iwk,w,jw,ierr) ! in :ilut:ilut.f90
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            real*8 :: alph
+            real*8 :: tol
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: iwk
+            real*8 dimension(2 * n),depend(n) :: w
+            integer dimension(2 * n),depend(n) :: jw
+            integer :: ierr
+        end subroutine ilud
+        subroutine iludp(n,a,ja,ia,alph,droptol,permtol,mbloc,alu,jlu,ju,iwk,w,jw,iperm,ierr) ! in :ilut:ilut.f90
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            real*8 :: alph
+            real*8 :: droptol
+            real*8 :: permtol
+            integer :: mbloc
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: iwk
+            real*8 dimension(2 * n),depend(n) :: w
+            integer dimension(2 * n),depend(n) :: jw
+            integer dimension(2 * n),depend(n) :: iperm
+            integer :: ierr
+        end subroutine iludp
+        subroutine iluk(n,nnz,nnzo,a,ja,ia,lfil,alu,jlu,ju,levs,iwk,ierr) ! in :ilut:ilut.f90
+            integer, optional,intent(in),check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            integer, optional,intent(in),check(len(a)>=nnz),depend(a) :: nnz=len(a)
+            integer intent(in) :: nnzo
+            real(kind=8) dimension(nnz),intent(in) :: a
+            integer dimension(nnz),intent(in),depend(nnz) :: ja
+            integer dimension(n + 1),intent(in) :: ia
+            integer intent(in) :: lfil
+            real(kind=8) dimension(nnzo),intent(out),depend(nnzo) :: alu
+            integer dimension(nnzo),intent(out),depend(nnzo) :: jlu
+            integer dimension(n),intent(out),depend(n) :: ju
+            integer dimension(iwk),intent(out),depend(iwk) :: levs
+            integer intent(in) :: iwk
+            integer intent(out) :: ierr
+        end subroutine iluk
+        subroutine ilu0(n,a,ja,ia,alu,jlu,ju,iw,ierr) ! in :ilut:ilut.f90
+            integer :: n
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(*) :: ju
+            integer dimension(*) :: iw
+            integer :: ierr
+        end subroutine ilu0
+        subroutine milu0(n,a,ja,ia,alu,jlu,ju,iw,ierr) ! in :ilut:ilut.f90
+            integer :: n
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(*) :: ju
+            integer dimension(*) :: iw
+            integer :: ierr
+        end subroutine milu0
+        subroutine pgmres(n,im,rhs,sol,vv,eps,maxits,iout,aa,ja,ia,alu,jlu,ju,ierr) ! in :ilut:ilut.f90
+            integer, optional,check(len(rhs)>=n),depend(rhs) :: n=len(rhs)
+            integer :: im
+            real*8 dimension(n) :: rhs
+            real*8 dimension(n),depend(n) :: sol
+            real*8 dimension(n,*),depend(n) :: vv
+            real*8 :: eps
+            integer :: maxits
+            integer :: iout
+            real*8 dimension(*) :: aa
+            integer dimension(*) :: ja
+            integer dimension(n + 1),depend(n) :: ia
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: ierr
+        end subroutine pgmres
+        subroutine lusol(n,y,x,alu,jlu,ju) ! in :ilut:ilut.f90
+            integer, optional,check(len(y)>=n),depend(y) :: n=len(y)
+            real*8 dimension(n) :: y
+            real*8 dimension(n),depend(n) :: x
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(*) :: ju
+        end subroutine lusol
+        subroutine lutsol(n,y,x,alu,jlu,ju) ! in :ilut:ilut.f90
+            integer, optional,check(len(y)>=n),depend(y) :: n=len(y)
+            real*8 dimension(n) :: y
+            real*8 dimension(n),depend(n) :: x
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(*) :: ju
+        end subroutine lutsol
+        subroutine qsplit(a,ind,n,ncut) ! in :ilut:ilut.f90
+            real*8 dimension(n) :: a
+            integer dimension(n),depend(n) :: ind
+            integer, optional,check(len(a)>=n),depend(a) :: n=len(a)
+            integer :: ncut
+        end subroutine qsplit
+        subroutine amux(n,x,y,a,ja,ia) ! in :ilut:ilut.f90
+            integer :: n
+            real*8 dimension(*) :: x
+            real*8 dimension(*) :: y
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+        end subroutine amux
+        subroutine ig(n,nnz,a,ia,ja,b,iwk,x,im,ierr1,ierr2,alu,jlu,ju) ! in :ilut:ilut.f90
+            integer, optional,intent(in),check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            integer, optional,intent(in),check(len(a)>=nnz),depend(a) :: nnz=len(a)
+            real(kind=8) dimension(nnz),intent(in) :: a
+            integer dimension(n + 1),intent(in) :: ia
+            integer dimension(nnz),intent(in),depend(nnz) :: ja
+            real(kind=8) dimension(n),intent(in),depend(n) :: b
+            integer intent(in) :: iwk
+            real(kind=8) dimension(n),intent(out),depend(n) :: x
+            integer :: im
+            integer intent(out) :: ierr1
+            integer intent(out) :: ierr2
+            real(kind=8) dimension(iwk),intent(out),depend(iwk) :: alu
+            integer dimension(iwk),intent(out),depend(iwk) :: jlu
+            integer dimension(n + 1),intent(out),depend(n) :: ju
+        end subroutine ig
+    end interface 
+end python module ilut
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

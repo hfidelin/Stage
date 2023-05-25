@@ -1,0 +1,154 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module iluoo ! in 
+    interface  ! in :iluoo
+        subroutine prevec2(iprevec,dummy,x,y,iwork,dwork) ! in :iluoo:iluoo.f90
+            integer dimension(*) :: iprevec
+            integer :: dummy
+            real*8 dimension(*) :: x
+            real*8 dimension(*) :: y
+            integer dimension(*) :: iwork
+            real*8 dimension(*) :: dwork
+        end subroutine prevec2
+        subroutine iluoo(n,xa,ai,av,tau1,tau2,verb,work,iwork,lendwork,leniwork,partlur,partlurout,lendworkout,leniworkout,ierr) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(xa)-1)>=n),depend(xa) :: n=(len(xa)-1)
+            integer dimension(n + 1) :: xa
+            integer dimension(*) :: ai
+            double precision dimension(*) :: av
+            double precision :: tau1
+            double precision :: tau2
+            integer :: verb
+            double precision dimension(lendwork) :: work
+            integer dimension(leniwork) :: iwork
+            integer, optional,check(len(work)>=lendwork),depend(work) :: lendwork=len(work)
+            integer, optional,check(len(iwork)>=leniwork),depend(iwork) :: leniwork=len(iwork)
+            double precision :: partlur
+            double precision :: partlurout
+            integer :: lendworkout
+            integer :: leniworkout
+            integer :: ierr
+        end subroutine iluoo
+        subroutine iluoo_init(n,xa,ai,av,tau1,tau2,inf,verb,mv,mi,luv,ilu,iu,lui,rv,ir,ri,lenlu,lenr,lenluout,lenrout,ierr) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(xa)-1)>=n),depend(xa) :: n=(len(xa)-1)
+            integer dimension(n + 1) :: xa
+            integer dimension(*) :: ai
+            double precision dimension(*) :: av
+            double precision :: tau1
+            double precision :: tau2
+            integer :: inf
+            integer :: verb
+            double precision dimension(*) :: mv
+            integer dimension(n + 1),depend(n) :: mi
+            double precision dimension(*) :: luv
+            integer dimension(n + 1),depend(n) :: ilu
+            integer dimension(n),depend(n) :: iu
+            integer dimension(*) :: lui
+            double precision dimension(*) :: rv
+            integer dimension(n + 1),depend(n) :: ir
+            integer dimension(*) :: ri
+            integer :: lenlu
+            integer :: lenr
+            integer :: lenluout
+            integer :: lenrout
+            integer :: ierr
+        end subroutine iluoo_init
+        subroutine elim_lpart(n,k,mi,mv,inf,tau1,tau2,luv,ilu,iu,lui,rv,ir,ri,nzm,nzum) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(mi)-1)>=n),depend(mi) :: n=(len(mi)-1)
+            integer :: k
+            integer dimension(n + 1) :: mi
+            double precision dimension(*) :: mv
+            integer :: inf
+            double precision :: tau1
+            double precision :: tau2
+            double precision dimension(*) :: luv
+            integer dimension(*) :: ilu
+            integer dimension(n),depend(n) :: iu
+            integer dimension(*) :: lui
+            double precision dimension(*) :: rv
+            integer dimension(*) :: ir
+            integer dimension(*) :: ri
+            integer :: nzm
+            integer :: nzum
+        end subroutine elim_lpart
+        subroutine row_compr(n,tau1,tau2,idiag,inf,mi,mv,luv,ilu,iu,lui,rv,ir,ri,verb,nmodif,tol_modif,lenlu,lenr,ierr) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(mi)-1)>=n),depend(mi) :: n=(len(mi)-1)
+            double precision :: tau1
+            double precision :: tau2
+            integer :: idiag
+            integer :: inf
+            integer dimension(n + 1) :: mi
+            double precision dimension(*) :: mv
+            double precision dimension(*) :: luv
+            integer dimension(*) :: ilu
+            integer dimension(*) :: iu
+            integer dimension(*) :: lui
+            double precision dimension(*) :: rv
+            integer dimension(*) :: ir
+            integer dimension(*) :: ri
+            integer :: verb
+            integer :: nmodif
+            double precision :: tol_modif
+            integer :: lenlu
+            integer :: lenr
+            integer :: ierr
+        end subroutine row_compr
+        subroutine row_uncomp(n,idiag,nz,ai,av,mi,mv,nzm,nzum,inf) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(mi)-1)>=n),depend(mi) :: n=(len(mi)-1)
+            integer :: idiag
+            integer :: nz
+            integer dimension(*) :: ai
+            double precision dimension(*) :: av
+            integer dimension(n + 1) :: mi
+            double precision dimension(*) :: mv
+            integer :: nzm
+            integer :: nzum
+            integer :: inf
+        end subroutine row_uncomp
+        subroutine iluoo_solve(n,luv,ilu,iu,lui,f) ! in :iluoo:iluoo.f90
+            integer :: n
+            double precision dimension(*) :: luv
+            integer dimension(*) :: ilu
+            integer dimension(*) :: iu
+            integer dimension(*) :: lui
+            double precision dimension(*) :: f
+        end subroutine iluoo_solve
+        subroutine genebs(niter,n,xa,ai,av,u,v) ! in :iluoo:iluoo.f90
+            integer :: niter
+            integer, optional,check((len(xa)-1)>=n),depend(xa) :: n=(len(xa)-1)
+            integer dimension(n + 1) :: xa
+            integer dimension(*) :: ai
+            double precision dimension(*) :: av
+            double precision dimension(*) :: u
+            double precision dimension(*) :: v
+        end subroutine genebs
+        subroutine matsc(n,xa,ai,av,u,v) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(xa)-1)>=n),depend(xa) :: n=(len(xa)-1)
+            integer dimension(n + 1) :: xa
+            integer dimension(*) :: ai
+            double precision dimension(*) :: av
+            double precision dimension(*) :: u
+            double precision dimension(*) :: v
+        end subroutine matsc
+        subroutine matisc(n,xa,ai,av,u,v) ! in :iluoo:iluoo.f90
+            integer, optional,check((len(xa)-1)>=n),depend(xa) :: n=(len(xa)-1)
+            integer dimension(n + 1) :: xa
+            integer dimension(*) :: ai
+            double precision dimension(*) :: av
+            double precision dimension(*) :: u
+            double precision dimension(*) :: v
+        end subroutine matisc
+        subroutine xxlusc(n,luv,ilu,iu,lui,u,v) ! in :iluoo:iluoo.f90
+            integer, optional,check(len(iu)>=n),depend(iu) :: n=len(iu)
+            double precision dimension(*) :: luv
+            integer dimension(*) :: ilu
+            integer dimension(n) :: iu
+            integer dimension(*) :: lui
+            double precision dimension(*) :: u
+            double precision dimension(*) :: v
+        end subroutine xxlusc
+    end interface 
+end python module iluoo
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

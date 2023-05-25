@@ -1,0 +1,5 @@
+numpy>=1.10.1
+cython>=0.23.4
+scipy
+numpydoc
+maxvolpy>=0.3.6

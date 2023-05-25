@@ -1,0 +1,26 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module integ ! in 
+    interface  ! in :integ
+        subroutine integr(xx0,yy0,zz0,n,xobs,yobs,zobs,inabla,isc,ivecx,ivecy,ivecz,flint,error) ! in :integ:integ.f90
+            double precision dimension(3),intent(in) :: xx0
+            double precision dimension(3),intent(in) :: yy0
+            double precision dimension(3),intent(in) :: zz0
+            integer intent(in) :: n
+            double precision intent(in) :: xobs
+            double precision intent(in) :: yobs
+            double precision intent(in) :: zobs
+            double precision intent(out) :: inabla
+            double precision intent(out) :: isc
+            double precision intent(out) :: ivecx
+            double precision intent(out) :: ivecy
+            double precision intent(out) :: ivecz
+            integer intent(in) :: flint
+            integer intent(out) :: error
+        end subroutine integr
+    end interface 
+end python module integ
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

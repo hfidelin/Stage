@@ -1752,10 +1752,6 @@ class H2matrix(object):
             Relative spectral distance to initial operator or `factor2`
             object.
         """
-        try:
-            svdp
-        except NameError:
-            raise ImportError("No pypropack installed, cannot measure error.")
         if factor2 is None:
             factor2 = self.problem
         # Fix to have the same random vector on all MPI nodes
@@ -1764,22 +1760,20 @@ class H2matrix(object):
             linop_diff = la.LinearOperator(self.shape, matvec=lambda x:
                     factor2.far_dot(x)-self.far_dot(x), rmatvec=lambda x:
                     factor2.far_rdot(x)-self.far_rdot(x), dtype=self.dtype)
-            s_diff = svdp(linop_diff, 1, compute_u=0, compute_v=0, kmax=100)
+            s_diff = la.svds(linop_diff, k=1, return_singular_vectors=False, maxiter=1000)
             linop_factor = la.LinearOperator(self.shape, matvec=self.far_dot,
                     rmatvec=self.far_rdot, dtype=self.dtype)
-            s_factor = svdp(linop_factor, 1, compute_u=0, compute_v=0,
-                    kmax=100)
+            s_factor = la.svds(linop_factor, k=1, return_singular_vectors=False, maxiter=1000)
         else:
             linop_diff = la.LinearOperator(self.shape, matvec=lambda x:
                         factor2.dot(x)-self.dot(x), rmatvec=lambda x:
                         factor2.rdot(x)-self.rdot(x), dtype=self.dtype)
-            s_diff = svdp(linop_diff, 1, compute_u=0, compute_v=0, kmax=100)
+            s_diff = la.svds(linop_diff, k=1, return_singular_vectors=False, maxiter=1000)
             linop_factor = la.LinearOperator(self.shape, matvec=lambda x:
                     self.dot(x), rmatvec=lambda x:self.rdot(x),
                     dtype=self.dtype)
-            s_factor = svdp(linop_factor, 1, compute_u=0, compute_v=0,
-                    kmax=100)
-        return s_diff[0][0]/s_factor[0][0]
+            s_factor = la.svds(linop_factor, k=1, return_singular_vectors=False, maxiter=1000)
+        return s_diff / s_factor
 
     def __str__(self):
         mpi_comm = self.mpi_comm

@@ -563,7 +563,7 @@ class H2matrix(object):
                 if tree.child[j]:
                     i1 = 0
                     for k in tree.child[j]:
-                        i2 = i1+basis_size[k]
+                        i2 = i1+int(basis_size[k])
                         if node_answer[k] is None:
                             node_answer[k] = tmp[i1:i2]
                         else:
@@ -594,7 +594,7 @@ class H2matrix(object):
                 if tree.child[j]:
                     i1 = 0
                     for k in tree.child[j]:
-                        i2 = i1+basis_size[k]
+                        i2 = i1+int(basis_size[k])
                         if node_answer[k] is None:
                             result.append((k, tmp[i1:i2]))
                         else:

@@ -49,7 +49,8 @@ if __name__ == "__main__":
             func = particles.inv_distance
         
             problem, L, A = init_particules_problem(position, func, block_size=100, full_matrix=True)   
-        
+            A += 100_000 * np.eye(N)
+            print(f'\n{ndim}D :CONDITIONNEMENT : ', np.linalg.cond(A))
             A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
             
             mv = A_h2.dot

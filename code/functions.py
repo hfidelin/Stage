@@ -234,14 +234,14 @@ def init_list_leaf(row_transfer, col_transfer, Block_size):
     col_leaf = []
     
     for i in range(1, len_row_transfer):
-        M = col_transfer[i]
+        M = col_transfer[i][0]
         if M.shape == (Block_size, Block_size):
             row_leaf.append(M)
 
     
     
     for i in range(1, len_col_transfer):
-        M = col_transfer[i]
+        M = col_transfer[i][0]
         if M.shape == (Block_size, Block_size):
             col_leaf.append(M)
 
@@ -297,12 +297,13 @@ def init_V0(N, col_leaf, Block_size):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 5000 #2 ** 3
-    ndim = 3
+    N = 2 ** 3
+    ndim = 1
     position = np.random.randn(ndim, N)
+    #position = np.linspace(0, 1, N).reshape((ndim, N))
 
-    tau = 1e-6
-    block_size = 100
+    tau = 1e-9
+    block_size = 4
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -311,25 +312,31 @@ if __name__ == '__main__':
     print(70 * '-')
     print(f"DONNÉES DU PROBLÈME :")
     print(f'\nN \t=\t{N}')
+    print(f'\nDIMENSION \t=\t{ndim}')
     print(f'\nB_SIZE \t=\t{block_size}')
-    print(f'\nDEPTH \t=\t{L}')
+    #print(f'\nDEPTH \t=\t{L}')
     print(f'\nTAU \t=\t{tau}')
     print(70 * '-', '\n')
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     A_h2.svdcompress(tau)
-    print(A_h2.diffnorm())
-    """
-    y_vec =[] 
-    for i in range(N):
-        c = np.zeros(N)
-        c[i] = 1
 
-        y = A_h2.dot(c)
-        y_vec.append(y)
+    row_far = A_h2.row_interaction
+    col_far = A_h2.col_interaction
+
     
-    A_dot = np.array(y_vec)
+    row_leaf, col_leaf = init_list_leaf(row_transfer=row_far, col_transfer=col_far, Block_size=block_size)
+    C0 = init_C0(problem)
+    F0 = init_F0(problem, list_far=row_far)
+    U0 = init_U0(N, row_leaf, block_size)
+    V0 = init_V0(N, col_leaf, block_size)
+
+    A1 = U0.T @ A @ V0
+    A1 = csc_matrix(A1)
+
+    plt.imshow(A1.todense())
+    plt.colorbar()
+    plt.show()
     
-    print(np.linalg.norm(A - A_dot))
-    """
-      
+    
+    
   

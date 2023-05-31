@@ -37,14 +37,15 @@ $$ \| A - \hat{A} \|$$
 
 Avec :
 * $A\in\mathcal{M}_N(\mathbb{R})$ matrice dense
-* $\hat{A}$ matrice $\mathcal{H}^2 $ de $A$
+* $\hat{A}~\mathrm{matrice}~\mathcal{H}^2~\mathrm{de}~A$ 
 * $N \in \mathbb{N}$ 
 
 On peut alors analyser numériquement cette erreur :
 
-![erreur_approx](./Images/Err_approx.png)
+![erreur_approx](./Images/ERR_H2_SCIPY.png)
 
 On voit alors que l'erreur en norme Frobenius suit *linéairement* la précision $\tau$.
+
 
 ## Analyse du produit matrice-vecteur pour une matrice $\mathcal{H} ^ 2$
 

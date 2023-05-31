@@ -8,18 +8,30 @@ Codes Python réalisés lors de mon stage de master sur la mise enplace d'un sol
 
 ## Installation de $h2tools$
 
-Pour ces codes, il est nécessaire d'installer différents packages Python :
+Afin d'utiliser, les fichiers de ce dépôt GitHub, voilà un rapide tutoriel pour l'installation des différents packages nécessaires.
 
-* pip 
+Nous recommendons vivement l'utilisation de $pip$ (https://pip.pypa.io/en/stable/installation/) pour l'installation des packages suivant :
+ 
 * numpy
 * numba
 * scipy
 * cython
 * maxvolpy
-* pypropack
-* h2tools
 
-Un tutoriel est (en cours) disponible dans le rapport de ce stage.
+Par exemple à l'aide de la commande :
+
+```
+pip install cython
+```
+
+
+Une fois ces packages installés, on peut alors installer $h2tools$ :
+
+1. Télécharger ce dépôt GitHub via :
+
+```
+git clone https://github.com/hfidelin/Stage.git
+```
 
 
 

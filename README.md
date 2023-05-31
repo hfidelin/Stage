@@ -33,7 +33,15 @@ Une fois ces packages installés, on peut alors installer $h2tools$ :
 git clone https://github.com/hfidelin/Stage.git
 ```
 
+2. Se placer dans le dépot GitHub 'Stage' qui vient d'être téléchargé
 
+3. Installer $h2tools$ via pip en rentrant :
+
+```
+pip install h2tools/
+```
+
+(**ATTENTION** : ne pas oublier le '/' à la fin de 'h2tools/', sinon vous installerez un package différent de celui du Git)
 
 ## Analyse de l'approximation numérique par matrice $\mathcal{H} ^ 2$
 

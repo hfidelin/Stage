@@ -32,12 +32,13 @@ def init_particules_problem(position, func, block_size, full_matrix=False ):
     else:
         return problem, L
 
-def solve_gmres(N, A, b, x_ref, eps, counter, verbose=False):
+def solve_gmres(N, A, b, x_ref, eps, Cond, counter, verbose=False):
     restart = int(N / 2)
 
     print(" -- Resolution GMRES QTT  --- ")
     tr = time.time()
-    x, info = gmres(A, b, tol=eps,restart=restart, maxiter=300 , callback=counter)
+    x, info = gmres(A, b, tol=eps,restart=restart, maxiter=300 , callback=counter, M=Cond)
+    print(f'INFO = {info}')
     tr = time.time() - tr
     err = np.linalg.norm(x-x_ref) #/ np.linalg.norm(x_ref)
     if verbose:

@@ -41,7 +41,7 @@ class Particles(object):
         """
         Returns True if bounding boxes are far.
         
-        If maximum diagonal of bounding boxes is larger, than distance
+        If maximum diagonal of bounding boxes is smaller, than distance
         between centers of bounding boxes, then bounding boxes are
         assumed to be far.
 

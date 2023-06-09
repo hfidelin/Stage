@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.sparse.linalg as la
 from h2tools import ClusterTree
 from h2tools import Problem
 from h2tools.collections import particles
-from scipy.sparse import csc_matrix
+from scipy.sparse import csc_matrix, csr_matrix
 from h2tools.mcbh import mcbh
 import time
 
@@ -167,7 +168,7 @@ def init_C0(problem, plot=False):
     
     return C0
 
-def init_F0(problem, list_far, plot=False):
+def init_F1(problem, list_far, plot=False):
     """
     Renvoie la matrice far F0
     """
@@ -305,11 +306,13 @@ def init_V0(N, col_leaf, Block_size):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 6
-    ndim = 3
-    position = np.random.randn(ndim, N)
+    N = 2 ** 3
+    ndim = 1
+    position = np.linspace(0, 1, N)
+    position = position.reshape(ndim, N)
+    #position = np.random.randn(ndim, N)
 
-    tau = 1e-6
+    tau = 1e-4
     block_size = 4
 
     func = particles.inv_distance
@@ -319,44 +322,72 @@ if __name__ == '__main__':
     print(70 * '-')
     print(f"DONNÉES DU PROBLÈME :")
     print(f'\nN \t=\t{N}')
-    print(f'\nDIMENSION \t=\t{ndim}')
+    print(f'\nDIM \t=\t{ndim}')
     print(f'\nB_SIZE \t=\t{block_size}')
     print(f'\nDEPTH \t=\t{L}')
     print(f'\nTAU \t=\t{tau}')
     print(70 * '-', '\n')
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    A_h2.svdcompress(tau)
+    #A_h2.svdcompress(tau)
+    #mv, rmv = A_h2.dot, A_h2.rdot
+    #A_h2_linop = la.LinearOperator((N, N), matvec=mv, rmatvec=rmv)
 
     row_far = A_h2.row_interaction
     col_far = A_h2.col_interaction
 
+    row_basis = A_h2.row_basis
+    col_basis = A_h2.col_basis
+
     row_transfer = A_h2.row_transfer
     col_transfer = A_h2.col_transfer
-
     
+    """
+    i = 0
+    for list in row_transfer:
+        if list is not None:
+            print(list.shape)
+        i += 1
+    """
+    
+    
+    
+    Far = row_far[1][0]
+    print(f'Far:\n{Far}')
+    print(70 * '-')
+    Transfer_R = row_transfer[1]
+    print(f'\nTransfert Row :\n{Transfer_R}')
+    print(70 * '-')
+    Transfer_C = col_transfer[1]
+    print(f'\nTransfert Column :\n{Transfer_C}')
+    print(70 * '-')
+    Res = Transfer_R @ Far @ Transfer_C.T
+    print(f'On a :\n{Res}')
+    print(70 * '-')
+
+    print(f'On doit trouver :\n{A[0:4, 4:8]}')
+    
+    
+
+    plt.imshow(A)
+    plt.colorbar()
+    plt.show()
+
+    """
     row_leaf, col_leaf = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
-    c = 0
-    for row in row_leaf:
-        c += 1
-
-    print("NOMBRE DE FEUILLE :", c)
-
-    C0 = init_C0(problem)
     
-    F0 = init_F0(problem, list_far=row_far)
-    
-    #plot_C0_F0(A, C0, F0)
     
     U0 = init_U0(N, row_leaf, block_size)
     
     V0 = init_V0(N, col_leaf, block_size)
+    V0 = V0.tocsr()
+    print(type(A_h2_linop))
+    #V0 = la.LinearOperator((N,N), matvec=V0.dot)
+    #A1_ref = U0 @ A @ V0
 
-    A1 = U0.T @ A @ V0
+    #A1 = A_h2_linop @ V0
 
-    plt.imshow(U0.todense())
+    plt.imshow(V0.todense())
     plt.colorbar()
     plt.show()
-       
-   
-  
+    """

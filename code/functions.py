@@ -312,7 +312,7 @@ if __name__ == '__main__':
     position = position.reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-4
+    tau = 1e-3
     block_size = 4
 
     func = particles.inv_distance
@@ -332,7 +332,7 @@ if __name__ == '__main__':
     #A_h2.svdcompress(tau)
     #mv, rmv = A_h2.dot, A_h2.rdot
     #A_h2_linop = la.LinearOperator((N, N), matvec=mv, rmatvec=rmv)
-
+    A_close = init_C0(problem)
     row_far = A_h2.row_interaction
     col_far = A_h2.col_interaction
 
@@ -366,28 +366,16 @@ if __name__ == '__main__':
     print(70 * '-')
 
     print(f'On doit trouver :\n{A[0:4, 4:8]}')
-    
-    
+    print(70 * '-')
+    """
+    A_far = A_close
+    A_far[0:4, 4:8] = np.fliplr(Res)
+    A_far[4:8, 0:4] = np.fliplr(Res).T
 
+    print(f'Erreur en norme : {np.linalg.norm(A_far - A )}')
+    """
     plt.imshow(A)
     plt.colorbar()
-    plt.show()
+    #plt.show()
 
-    """
-    row_leaf, col_leaf = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
     
-    
-    U0 = init_U0(N, row_leaf, block_size)
-    
-    V0 = init_V0(N, col_leaf, block_size)
-    V0 = V0.tocsr()
-    print(type(A_h2_linop))
-    #V0 = la.LinearOperator((N,N), matvec=V0.dot)
-    #A1_ref = U0 @ A @ V0
-
-    #A1 = A_h2_linop @ V0
-
-    plt.imshow(V0.todense())
-    plt.colorbar()
-    plt.show()
-    """

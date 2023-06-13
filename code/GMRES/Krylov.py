@@ -52,19 +52,16 @@ if __name__ == "__main__":
             A += 100_000 * np.eye(N)
             print(f'\n{ndim}D :CONDITIONNEMENT : ', np.linalg.cond(A))
             A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-            M = A.diagonal()
-            M = np.diag(M)
-            #M = np.eye(N)
             mv = A_h2.dot
             rmv = A_h2.rdot
             A_h2 = LinearOperator((N, N), matvec=mv, rmatvec=rmv)
-            x_ref = np.ones(N)
+            x_ref = np.random.randn(N)
             b = A_h2.matvec(x_ref) 
 
 
             count = gmres_counter()
             #x_ref = np.linalg.solve(A, b)
-            x, err = solve_gmres(N, A_h2, b, x_ref, eps=1e-10, Cond=M, counter = count)
+            x, err = solve_gmres(N, A_h2, b, x_ref, eps=1e-10, counter = count)
             print(f'\nPour N = {N}\t ERREUR : {err}')
             Y.append(err)
 

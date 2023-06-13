@@ -342,15 +342,6 @@ if __name__ == '__main__':
     row_transfer = A_h2.row_transfer
     col_transfer = A_h2.col_transfer
     
-    """
-    i = 0
-    for list in row_transfer:
-        if list is not None:
-            print(list.shape)
-        i += 1
-    """
-    
-    
     
     Far = row_far[1][0]
     print(f'Far:\n{Far}')
@@ -362,7 +353,7 @@ if __name__ == '__main__':
     print(f'\nTransfert Column :\n{Transfer_C}')
     print(70 * '-')
     Res = Transfer_R @ Far @ Transfer_C.T
-    print(f'On a :\n{Res}')
+    print(f'On a :\n{np.fliplr(Res)}')
     print(70 * '-')
 
     print(f'On doit trouver :\n{A[0:4, 4:8]}')

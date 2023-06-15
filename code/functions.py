@@ -312,7 +312,7 @@ if __name__ == '__main__':
     position = position.reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-3
+    tau = 1e-4
     block_size = 4
 
     func = particles.inv_distance
@@ -341,7 +341,7 @@ if __name__ == '__main__':
 
     row_transfer = A_h2.row_transfer
     col_transfer = A_h2.col_transfer
-    
+       
     
     Far = row_far[1][0]
     print(f'Far:\n{Far}')
@@ -349,24 +349,18 @@ if __name__ == '__main__':
     Transfer_R = row_transfer[1]
     print(f'\nTransfert Row :\n{Transfer_R}')
     print(70 * '-')
-    Transfer_C = col_transfer[1]
+    Transfer_C = col_transfer[2]
     print(f'\nTransfert Column :\n{Transfer_C}')
     print(70 * '-')
     Res = Transfer_R @ Far @ Transfer_C.T
-    print(f'On a :\n{np.fliplr(Res)}')
+    print(f'On a :\n{Res}')
     print(70 * '-')
 
     print(f'On doit trouver :\n{A[0:4, 4:8]}')
     print(70 * '-')
-    """
-    A_far = A_close
-    A_far[0:4, 4:8] = np.fliplr(Res)
-    A_far[4:8, 0:4] = np.fliplr(Res).T
-
-    print(f'Erreur en norme : {np.linalg.norm(A_far - A )}')
-    """
+    
     plt.imshow(A)
     plt.colorbar()
     #plt.show()
-
+    
     

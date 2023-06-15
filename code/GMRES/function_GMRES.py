@@ -33,6 +33,7 @@ def init_particules_problem(position, func, block_size, full_matrix=False ):
         return problem, L
 
 def solve_gmres(N, A, b, x_ref, eps, counter, verbose=False):
+    
     restart = int(N / 2)
 
     print(" -- Resolution GMRES QTT  --- ")

@@ -8,8 +8,9 @@ import time
 import matplotlib.pyplot as plt
 from function_GMRES import init_particules_problem, solve_gmres
 from h2tools.mcbh import mcbh
-from scipy.sparse.linalg import LinearOperator
+from scipy.sparse.linalg import LinearOperator, gmres
 from h2tools.collections import particles
+
 
 
 class gmres_counter(object):
@@ -39,6 +40,7 @@ if __name__ == "__main__":
         print(f'DIMENSION = {ndim} ')
         X = []
         Y = []
+        Y2 = []
         for N in N_vec:
 
             X.append(N)
@@ -50,7 +52,7 @@ if __name__ == "__main__":
         
             problem, L, A = init_particules_problem(position, func, block_size=100, full_matrix=True)   
             A += 100_000 * np.eye(N)
-            print(f'\n{ndim}D :CONDITIONNEMENT : ', np.linalg.cond(A))
+            #print(f'\n{ndim}D :CONDITIONNEMENT : ', np.linalg.cond(A))
             A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
             mv = A_h2.dot
             rmv = A_h2.rdot
@@ -60,16 +62,21 @@ if __name__ == "__main__":
 
 
             count = gmres_counter()
-            #x_ref = np.linalg.solve(A, b)
+            x2_ref = np.linalg.solve(A, b)
             x, err = solve_gmres(N, A_h2, b, x_ref, eps=1e-10, counter = count)
-            print(f'\nPour N = {N}\t ERREUR : {err}')
+            x2, info = gmres(A, b, tol=1e-10, maxiter=300)
+            err2 = np.linalg.norm(x2_ref - x2)
+            #print(f'\nPour N = {N}\t ERREURS : {err}')
             Y.append(err)
+            Y2.append(err2)
+
 
 
         print(f"Temps d'exécution : {time.time() - start}")
 
+        plt.loglog(X, Y2, label=f'Première méthode', linewidth=2, marker='^', c='r')
+        plt.loglog(X, Y, label=f'Deuxième méthode', linewidth=2, marker='^', c='b')
         
-        plt.loglog(X, Y, label=f'{ndim}D', linewidth=2, marker='^')
 
     plt.title("Erreur solveur GMRES")
     plt.xlabel("Nombre d'inconnu $N$")

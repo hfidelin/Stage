@@ -7,6 +7,7 @@ from h2tools.collections import particles
 from scipy.sparse import csc_matrix, csr_matrix
 from h2tools.mcbh import mcbh
 import time
+import pandas as pd
 
 def init_particules_problem(position, func, block_size, full_matrix=False ):
     """
@@ -133,7 +134,7 @@ def init_N_vect(problem):
                         N_vect += 1
     return N_vect
 
-def init_C0(problem, plot=False):
+def init_C0(N, problem, plot=False):
     """
     Renvoie la matrice close C0
     """
@@ -236,10 +237,10 @@ def init_list_leaf(row_transfer, col_transfer, Block_size):
     #print(row_transfer)
     for i in range(1, len_row_transfer):
         M = row_transfer[i]
-        #print(M.shape)
+        #print('Row Transfert :\n',M.shape)
         if M is not None:
             if M.shape == (Block_size, Block_size):
-                print(M, '\n')
+                #print(M, '\n')
                 row_leaf.append(M)
         
 
@@ -247,10 +248,10 @@ def init_list_leaf(row_transfer, col_transfer, Block_size):
     
     for i in range(1, len_col_transfer):
         M = col_transfer[i]
-        #print(M.shape)
+        #print('Col Transfert :\n',M.shape)
         if M is not None:
             if M.shape == (Block_size, Block_size):
-                print(M, '\n')
+                #print(M, '\n')
                 col_leaf.append(M)
 
     return row_leaf, col_leaf
@@ -308,12 +309,11 @@ if __name__ == '__main__':
     start = time.time()
     N = 2 ** 3
     ndim = 1
-    position = np.linspace(0, 1, N)
-    position = position.reshape(ndim, N)
+    position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-4
-    block_size = 4
+    tau = 1e-1
+    block_size = 2
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -329,38 +329,76 @@ if __name__ == '__main__':
     print(70 * '-', '\n')
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    #A_h2.svdcompress(tau)
-    #mv, rmv = A_h2.dot, A_h2.rdot
-    #A_h2_linop = la.LinearOperator((N, N), matvec=mv, rmatvec=rmv)
-    A_close = init_C0(problem)
+    
+    M_h2 = np.zeros(A_h2.shape)
+    
     row_far = A_h2.row_interaction
     col_far = A_h2.col_interaction
 
-    row_basis = A_h2.row_basis
-    col_basis = A_h2.col_basis
 
     row_transfer = A_h2.row_transfer
     col_transfer = A_h2.col_transfer
-       
-    
-    Far = row_far[1][0]
-    print(f'Far:\n{Far}')
-    print(70 * '-')
-    Transfer_R = row_transfer[1]
-    print(f'\nTransfert Row :\n{Transfer_R}')
-    print(70 * '-')
-    Transfer_C = col_transfer[2]
-    print(f'\nTransfert Column :\n{Transfer_C}')
-    print(70 * '-')
-    Res = Transfer_R @ Far @ Transfer_C.T
-    print(f'On a :\n{Res}')
-    print(70 * '-')
 
-    print(f'On doit trouver :\n{A[0:4, 4:8]}')
-    print(70 * '-')
+    row_basis, col_basis = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
     
-    plt.imshow(A)
+    print(70 * '-', '\n')
+    #print(row_transfer[3],'\n')
+    #print(row_transfer[4],'\n')
+    t = 0
+    for mat in row_transfer:
+        print(f"T{t} :\n")
+        print(mat, '\n')
+        t += 1
+
+    V3 = row_transfer[3]
+    V4 = row_transfer[4]
+    V5 = row_transfer[5]
+    V6 = row_transfer[6]
+    
+    #print(V3.shape, row_transfer[3].shape)
+    V1 = V3 @ row_transfer[3] + V4 @ row_transfer[4]
+    V2 = V5 @ row_transfer[5] + V6 @ row_transfer[6]
+    print(70 * '-', '\n')
+    df = pd.DataFrame(A)
+    #print(df)
+    """
+    for mat in row_far:
+        if len(mat) != 0:
+            print(mat[0],'\n')
+    print(70 * '-', '\n')
+    for i in range(1, problem.row_tree.num_nodes):
+        print(f"Noeud n°{i}\n")
+        if (problem.row_far[i]):
+            for j in problem.row_far[i]:
+
+                T_r = row_transfer[i]
+                print(T_r, '\n')
+                S = row_far[i][0]
+                T_c = col_transfer[j]
+                print(f"Shape du produit : {T_r.shape}, {S.shape}, {T_c.T.shape}")
+                F = T_r @ S @ T_c.T
+
+                row_vect = problem.row_tree.index[i]
+                col_vect = problem.row_tree.index[j]
+                print(f"Index ligne : \t{row_vect}")
+                print(f"Index colonne :\t{col_vect}")
+                row_vect = list(row_vect)
+                col_vect = list(col_vect)
+                F_verif = A[np.ix_(row_vect, col_vect)]
+                #M_h2[np.ix_(row_vect, col_vect)] = F
+                try:
+                    print(np.linalg.norm(F - F_verif))
+                except:
+                    print(f"ECHEC : {len(row_vect), len(col_vect)} pour {F.shape}")
+                df = pd.DataFrame(F_verif)
+                #print(df)
+        print(70 * '-', '\n')
+
+    #print(f"Erreur norme : {np.linalg.norm(A - M_h2)}")
+    
+    plt.imshow(M_h2)
     plt.colorbar()
     #plt.show()
-    
+    """
+
     

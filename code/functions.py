@@ -307,13 +307,13 @@ def init_V0(N, col_leaf, Block_size):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 3
+    N = 2 ** 6
     ndim = 1
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
     tau = 1e-1
-    block_size = 2
+    block_size = 16
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -356,8 +356,16 @@ if __name__ == '__main__':
     V6 = row_transfer[6]
     
     #print(V3.shape, row_transfer[3].shape)
-    V1 = V3 @ row_transfer[3] + V4 @ row_transfer[4]
-    V2 = V5 @ row_transfer[5] + V6 @ row_transfer[6]
+    #V1 = V3 @ row_transfer[3] + V4 @ row_transfer[4]
+    U = np.zeros((V3.shape[0]+V4.shape[0], V3.shape[1]+V4.shape[1]))
+    U[:V3.shape[0], :V3.shape[1]] = V3
+    U[-V4.shape[0]:, -V4.shape[1]:] = V4
+    V1 = U @ row_transfer[1]
+    #V2 = V5 @ row_transfer[5] + V6 @ row_transfer[6]
+    U = np.zeros((V5.shape[0]+V6.shape[0], V5.shape[1]+V6.shape[1]))
+    U[:V5.shape[0], :V5.shape[1]] = V5
+    U[-V6.shape[0]:, -V6.shape[1]:] = V6
+    V2 = U @ row_transfer[2]    
     print(70 * '-', '\n')
     df = pd.DataFrame(A)
     #print(df)

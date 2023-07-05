@@ -307,13 +307,13 @@ def init_V0(N, col_leaf, Block_size):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 6
+    N = 2 ** 3
     ndim = 1
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-1
-    block_size = 16
+    tau = 1e-2
+    block_size = 2
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -329,7 +329,7 @@ if __name__ == '__main__':
     print(70 * '-', '\n')
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    
+    A_h2.svdcompress(tau = 1e-5)
     M_h2 = np.zeros(A_h2.shape)
     
     row_far = A_h2.row_interaction
@@ -341,34 +341,39 @@ if __name__ == '__main__':
 
     row_basis, col_basis = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
     
-    print(70 * '-', '\n')
     #print(row_transfer[3],'\n')
     #print(row_transfer[4],'\n')
-    t = 0
-    for mat in row_transfer:
-        print(f"T{t} :\n")
-        print(mat, '\n')
-        t += 1
-
     V3 = row_transfer[3]
     V4 = row_transfer[4]
     V5 = row_transfer[5]
     V6 = row_transfer[6]
     
-    #print(V3.shape, row_transfer[3].shape)
-    #V1 = V3 @ row_transfer[3] + V4 @ row_transfer[4]
-    U = np.zeros((V3.shape[0]+V4.shape[0], V3.shape[1]+V4.shape[1]))
+    U = np.zeros((V3.shape[0] + V4.shape[0], V3.shape[1] + V4.shape[1]))
+    print('Indice :', V3.shape[0])
     U[:V3.shape[0], :V3.shape[1]] = V3
     U[-V4.shape[0]:, -V4.shape[1]:] = V4
     V1 = U @ row_transfer[1]
-    #V2 = V5 @ row_transfer[5] + V6 @ row_transfer[6]
     U = np.zeros((V5.shape[0]+V6.shape[0], V5.shape[1]+V6.shape[1]))
     U[:V5.shape[0], :V5.shape[1]] = V5
     U[-V6.shape[0]:, -V6.shape[1]:] = V6
-    V2 = U @ row_transfer[2]    
+    V2 = U @ row_transfer[2]
+    F = V1 @ row_far[1][0] @ V2.T  
+    for i in range(1, problem.row_tree.num_nodes):
+        print(f"Noeud n°{i}\n")
+        if (problem.row_far[i]):
+            for j in problem.row_far[i]:
+
+                row_vect = problem.row_tree.index[i]
+                col_vect = problem.row_tree.index[j]
+                F_verif = A[np.ix_(row_vect, col_vect)]
+                #M_h2[np.ix_(row_vect, col_vect)] = F
+                print(F_verif)
+                
+    #print(f'F =\n {F.shape}')  
     print(70 * '-', '\n')
     df = pd.DataFrame(A)
-    #print(df)
+    print(df)
+
     """
     for mat in row_far:
         if len(mat) != 0:

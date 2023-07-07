@@ -307,12 +307,12 @@ def init_V0(N, col_leaf, Block_size):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 3
+    N = 2 ** 4
     ndim = 1
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-2
+    tau = 1e-4
     block_size = 2
 
     func = particles.inv_distance
@@ -341,8 +341,66 @@ if __name__ == '__main__':
 
     row_basis, col_basis = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
     
-    #print(row_transfer[3],'\n')
-    #print(row_transfer[4],'\n')
+    
+    def get_base(problem, i):
+        child = problem.row_tree.child[i]
+        if not (child):
+            Base = row_transfer[i]
+        elif (child):
+            for c in child:
+                B_temp = get_base(problem, c)
+                U = np.zeros((row_transfer[child[0]].shape[0] + row_transfer[child[1]].shape[0], row_transfer[child[0]].shape[1] + row_transfer[child[1]].shape[1]))
+                U[:row_transfer[child[0]].shape[0], :row_transfer[child[0]].shape[1]] = row_transfer[child[0]]
+                U[-row_transfer[child[1]].shape[0]:, -row_transfer[child[1]].shape[1]:] = row_transfer[child[1]]
+            Base = 1
+        
+        return Base
+
+
+    vect_base = []
+    ind_b = 0
+    for i in reversed(range(1, problem.row_tree.num_nodes)):
+        #print(f"Noeud n°{i}\n")
+        
+        if (problem.row_far[i]):
+            if (problem.row_tree.child[i]):
+                
+                child = problem.row_tree.child[i]
+                
+                
+                Base_c1 = vect_base[ind_b + 1]
+                Base_c2 = vect_base[ind_b]
+                #print(f"Indice base {ind_b + 1}:\n {Base_c1}\n")
+                #print(f"Indice base {ind_b }:\n {Base_c2}\n")
+                U = np.zeros((Base_c1.shape[0] + Base_c2.shape[0], Base_c1.shape[1] + Base_c2.shape[1]))
+                U[:Base_c1.shape[0], :Base_c1.shape[1]] = Base_c1
+                U[-Base_c2.shape[0]:, -Base_c2.shape[1]:] = Base_c2
+                #print(f'U shape = {U.shape}')
+                #print(f'Transfer shape : {row_transfer[i].shape}')
+                Base = U @ row_transfer[i]
+                ind_b += 2
+                
+            else:
+                Base = row_transfer[i]
+                print(Base)
+        
+            print(15 * '-', '\n')
+        
+        vect_base.append(Base)
+            
+           
+    vect_base = list(reversed(vect_base))
+    
+    
+
+
+                
+    #print(f'F =\n {F.shape}')  
+    print(70 * '-', '\n')
+    df = pd.DataFrame(A)
+    #print(df)
+
+    """
     V3 = row_transfer[3]
     V4 = row_transfer[4]
     V5 = row_transfer[5]
@@ -358,60 +416,22 @@ if __name__ == '__main__':
     U[-V6.shape[0]:, -V6.shape[1]:] = V6
     V2 = U @ row_transfer[2]
     F = V1 @ row_far[1][0] @ V2.T  
+
+    row_vect = problem.row_tree.index[i]
+    col_vect = problem.row_tree.index[j]
+    F_verif = A[np.ix_(row_vect, col_vect)]
+    M_h2[np.ix_(row_vect, col_vect)] = F
+
     for i in range(1, problem.row_tree.num_nodes):
         print(f"Noeud n°{i}\n")
         if (problem.row_far[i]):
             for j in problem.row_far[i]:
-
-                row_vect = problem.row_tree.index[i]
-                col_vect = problem.row_tree.index[j]
-                F_verif = A[np.ix_(row_vect, col_vect)]
-                #M_h2[np.ix_(row_vect, col_vect)] = F
-                print(F_verif)
-                
-    #print(f'F =\n {F.shape}')  
-    print(70 * '-', '\n')
-    df = pd.DataFrame(A)
-    print(df)
+                row_ind = problem.row_tree.index[i]
+                col_ind = problem.col_tree.index[j]
+                print(vect_base[i].shape, row_far[i][0].shape, vect_base[i].shape)
+                F = vect_base[i] @ row_far[i][0] @ vect_base[i].T
 
     """
-    for mat in row_far:
-        if len(mat) != 0:
-            print(mat[0],'\n')
-    print(70 * '-', '\n')
-    for i in range(1, problem.row_tree.num_nodes):
-        print(f"Noeud n°{i}\n")
-        if (problem.row_far[i]):
-            for j in problem.row_far[i]:
-
-                T_r = row_transfer[i]
-                print(T_r, '\n')
-                S = row_far[i][0]
-                T_c = col_transfer[j]
-                print(f"Shape du produit : {T_r.shape}, {S.shape}, {T_c.T.shape}")
-                F = T_r @ S @ T_c.T
-
-                row_vect = problem.row_tree.index[i]
-                col_vect = problem.row_tree.index[j]
-                print(f"Index ligne : \t{row_vect}")
-                print(f"Index colonne :\t{col_vect}")
-                row_vect = list(row_vect)
-                col_vect = list(col_vect)
-                F_verif = A[np.ix_(row_vect, col_vect)]
-                #M_h2[np.ix_(row_vect, col_vect)] = F
-                try:
-                    print(np.linalg.norm(F - F_verif))
-                except:
-                    print(f"ECHEC : {len(row_vect), len(col_vect)} pour {F.shape}")
-                df = pd.DataFrame(F_verif)
-                #print(df)
-        print(70 * '-', '\n')
-
-    #print(f"Erreur norme : {np.linalg.norm(A - M_h2)}")
-    
-    plt.imshow(M_h2)
-    plt.colorbar()
-    #plt.show()
-    """
+  
 
     

@@ -304,6 +304,34 @@ def init_V0(N, col_leaf, Block_size):
     #fig.savefig('decomp.png')
     plt.show()
 
+
+def init_vect_base(problem, list_transfer):
+    vect_base = []
+    ind_b = 0
+    for i in reversed(range(1, problem.row_tree.num_nodes)):
+        #print(f"Noeud n°{i}\n")
+        
+        if (problem.row_far[i]):
+            if (problem.row_tree.child[i]):
+                
+                Base_c1 = vect_base[ind_b + 1]
+                Base_c2 = vect_base[ind_b]
+                U = np.zeros((Base_c1.shape[0] + Base_c2.shape[0], Base_c1.shape[1] + Base_c2.shape[1]))
+                U[:Base_c1.shape[0], :Base_c1.shape[1]] = Base_c1
+                U[-Base_c2.shape[0]:, -Base_c2.shape[1]:] = Base_c2
+                Base = U @ list_transfer[i]
+                ind_b += 2
+                
+            else:
+                Base = list_transfer[i]
+               
+        
+        vect_base.append(Base)
+            
+           
+    return list(reversed(vect_base))
+    
+
 if __name__ == '__main__':
     
     start = time.time()
@@ -312,7 +340,7 @@ if __name__ == '__main__':
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-4
+    tau = 1e-9
     block_size = 2
 
     func = particles.inv_distance
@@ -329,7 +357,7 @@ if __name__ == '__main__':
     print(70 * '-', '\n')
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    A_h2.svdcompress(tau = 1e-5)
+    #A_h2.svdcompress(tau = 1e-2)
     M_h2 = np.zeros(A_h2.shape)
     
     row_far = A_h2.row_interaction
@@ -339,64 +367,25 @@ if __name__ == '__main__':
     row_transfer = A_h2.row_transfer
     col_transfer = A_h2.col_transfer
 
-    row_basis, col_basis = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
-    
-    
-    def get_base(problem, i):
-        child = problem.row_tree.child[i]
-        if not (child):
-            Base = row_transfer[i]
-        elif (child):
-            for c in child:
-                B_temp = get_base(problem, c)
-                U = np.zeros((row_transfer[child[0]].shape[0] + row_transfer[child[1]].shape[0], row_transfer[child[0]].shape[1] + row_transfer[child[1]].shape[1]))
-                U[:row_transfer[child[0]].shape[0], :row_transfer[child[0]].shape[1]] = row_transfer[child[0]]
-                U[-row_transfer[child[1]].shape[0]:, -row_transfer[child[1]].shape[1]:] = row_transfer[child[1]]
-            Base = 1
-        
-        return Base
+    row_basis = init_vect_base(problem, row_transfer)
+    row_basis.insert(0, [])
 
-
-    vect_base = []
-    ind_b = 0
-    for i in reversed(range(1, problem.row_tree.num_nodes)):
-        #print(f"Noeud n°{i}\n")
-        
+    
+    for i in range(1, problem.row_tree.num_nodes):
+        print(f"Noeud n°{i}\n")
         if (problem.row_far[i]):
-            if (problem.row_tree.child[i]):
-                
-                child = problem.row_tree.child[i]
-                
-                
-                Base_c1 = vect_base[ind_b + 1]
-                Base_c2 = vect_base[ind_b]
-                #print(f"Indice base {ind_b + 1}:\n {Base_c1}\n")
-                #print(f"Indice base {ind_b }:\n {Base_c2}\n")
-                U = np.zeros((Base_c1.shape[0] + Base_c2.shape[0], Base_c1.shape[1] + Base_c2.shape[1]))
-                U[:Base_c1.shape[0], :Base_c1.shape[1]] = Base_c1
-                U[-Base_c2.shape[0]:, -Base_c2.shape[1]:] = Base_c2
-                #print(f'U shape = {U.shape}')
-                #print(f'Transfer shape : {row_transfer[i].shape}')
-                Base = U @ row_transfer[i]
-                ind_b += 2
-                
-            else:
-                Base = row_transfer[i]
-                print(Base)
-        
-            print(15 * '-', '\n')
-        
-        vect_base.append(Base)
-            
-           
-    vect_base = list(reversed(vect_base))
+            for j in problem.row_far[i]:
+                row_ind = problem.row_tree.index[i]
+                col_ind = problem.col_tree.index[j]
+                print(row_basis[i].shape, row_far[i][0].shape, row_basis[j].shape)
+                F = row_basis[i] @ row_far[i][0] @ row_basis[j].T
+                M_h2[np.ix_(row_ind, col_ind)] = F
     
     
-
-
-                
-    #print(f'F =\n {F.shape}')  
+    C0 = init_C0(N, problem)
+    M_h2 += C0       
     print(70 * '-', '\n')
+    print(np.linalg.norm(M_h2 - A))
     df = pd.DataFrame(A)
     #print(df)
 

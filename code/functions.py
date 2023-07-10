@@ -340,7 +340,7 @@ if __name__ == '__main__':
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
 
-    tau = 1e-9
+    tau = 1e-2
     block_size = 2
 
     func = particles.inv_distance
@@ -359,7 +359,7 @@ if __name__ == '__main__':
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     #A_h2.svdcompress(tau = 1e-2)
     M_h2 = np.zeros(A_h2.shape)
-    
+    print(f"ERREUR H² : {A_h2.diffnorm()}")
     row_far = A_h2.row_interaction
     col_far = A_h2.col_interaction
 
@@ -377,18 +377,23 @@ if __name__ == '__main__':
             for j in problem.row_far[i]:
                 row_ind = problem.row_tree.index[i]
                 col_ind = problem.col_tree.index[j]
-                print(row_basis[i].shape, row_far[i][0].shape, row_basis[j].shape)
+                #print(row_basis[i].shape, row_far[i][0].shape, row_basis[j].shape)
                 F = row_basis[i] @ row_far[i][0] @ row_basis[j].T
                 M_h2[np.ix_(row_ind, col_ind)] = F
+
+                F_verif = A[np.ix_(row_ind, col_ind)]
+                print('Erreur locale :', np.linalg.norm(F - F_verif), '\n')
     
     
     C0 = init_C0(N, problem)
     M_h2 += C0       
     print(70 * '-', '\n')
-    print(np.linalg.norm(M_h2 - A))
+    print(np.linalg.norm(M_h2 - A ))
     df = pd.DataFrame(A)
     #print(df)
-
+    plt.imshow(A - M_h2)
+    plt.colorbar()
+    plt.show()
     """
     V3 = row_transfer[3]
     V4 = row_transfer[4]
@@ -408,7 +413,6 @@ if __name__ == '__main__':
 
     row_vect = problem.row_tree.index[i]
     col_vect = problem.row_tree.index[j]
-    F_verif = A[np.ix_(row_vect, col_vect)]
     M_h2[np.ix_(row_vect, col_vect)] = F
 
     for i in range(1, problem.row_tree.num_nodes):

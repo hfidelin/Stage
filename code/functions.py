@@ -4,7 +4,7 @@ import scipy.sparse.linalg as la
 from h2tools import ClusterTree
 from h2tools import Problem
 from h2tools.collections import particles
-from scipy.sparse import csc_matrix, csr_matrix
+from scipy.sparse import csc_matrix,lil_matrix
 from h2tools.mcbh import mcbh
 import time
 import pandas as pd
@@ -316,9 +316,11 @@ def init_vect_base(problem, list_transfer):
                 
                 Base_c1 = vect_base[ind_b + 1]
                 Base_c2 = vect_base[ind_b]
-                U = np.zeros((Base_c1.shape[0] + Base_c2.shape[0], Base_c1.shape[1] + Base_c2.shape[1]))
+                U = lil_matrix((Base_c1.shape[0] + Base_c2.shape[0], Base_c1.shape[1] + Base_c2.shape[1]))
                 U[:Base_c1.shape[0], :Base_c1.shape[1]] = Base_c1
                 U[-Base_c2.shape[0]:, -Base_c2.shape[1]:] = Base_c2
+                
+                 
                 Base = U @ list_transfer[i]
                 ind_b += 2
                 
@@ -335,13 +337,13 @@ def init_vect_base(problem, list_transfer):
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 4
+    N = 2 ** 10
     ndim = 1
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
-
-    tau = 1e-2
-    block_size = 2
+    L = 3
+    tau = 1e-8
+    block_size = N // (2 ** L)
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -359,7 +361,6 @@ if __name__ == '__main__':
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     #A_h2.svdcompress(tau = 1e-2)
     M_h2 = np.zeros(A_h2.shape)
-    print(f"ERREUR H² : {A_h2.diffnorm()}")
     row_far = A_h2.row_interaction
     col_far = A_h2.col_interaction
 
@@ -382,49 +383,17 @@ if __name__ == '__main__':
                 M_h2[np.ix_(row_ind, col_ind)] = F
 
                 F_verif = A[np.ix_(row_ind, col_ind)]
-                print('Erreur locale :', np.linalg.norm(F - F_verif), '\n')
+                print('Erreur locale :', np.linalg.norm(F - F_verif) / np.linalg.norm(F), '\n')
     
     
     C0 = init_C0(N, problem)
     M_h2 += C0       
     print(70 * '-', '\n')
-    print(np.linalg.norm(M_h2 - A ))
+    print(f"ERREUR H² : {A_h2.diffnorm()}\n")
+    print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A ) / np.linalg.norm(M_h2))
     df = pd.DataFrame(A)
     #print(df)
     plt.imshow(A - M_h2)
     plt.colorbar()
     plt.show()
-    """
-    V3 = row_transfer[3]
-    V4 = row_transfer[4]
-    V5 = row_transfer[5]
-    V6 = row_transfer[6]
-    
-    U = np.zeros((V3.shape[0] + V4.shape[0], V3.shape[1] + V4.shape[1]))
-    print('Indice :', V3.shape[0])
-    U[:V3.shape[0], :V3.shape[1]] = V3
-    U[-V4.shape[0]:, -V4.shape[1]:] = V4
-    V1 = U @ row_transfer[1]
-    U = np.zeros((V5.shape[0]+V6.shape[0], V5.shape[1]+V6.shape[1]))
-    U[:V5.shape[0], :V5.shape[1]] = V5
-    U[-V6.shape[0]:, -V6.shape[1]:] = V6
-    V2 = U @ row_transfer[2]
-    F = V1 @ row_far[1][0] @ V2.T  
-
-    row_vect = problem.row_tree.index[i]
-    col_vect = problem.row_tree.index[j]
-    M_h2[np.ix_(row_vect, col_vect)] = F
-
-    for i in range(1, problem.row_tree.num_nodes):
-        print(f"Noeud n°{i}\n")
-        if (problem.row_far[i]):
-            for j in problem.row_far[i]:
-                row_ind = problem.row_tree.index[i]
-                col_ind = problem.col_tree.index[j]
-                print(vect_base[i].shape, row_far[i][0].shape, vect_base[i].shape)
-                F = vect_base[i] @ row_far[i][0] @ vect_base[i].T
-
-    """
-  
-
     

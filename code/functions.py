@@ -329,20 +329,40 @@ def init_vect_base(problem, list_transfer):
                
         
         vect_base.append(Base)
-            
-           
-    return list(reversed(vect_base))
+
+    vect_base = list(reversed(vect_base))        
+    vect_base.insert(0, [])
     
+    return vect_base
+    
+def build_A(problem, list_row_basis, list_col_basis, list_far):
+    M_h2 = np.zeros(A_h2.shape)
+    for i in range(1, problem.row_tree.num_nodes):
+        #print(f"Noeud n°{i}\n")
+        if (problem.row_far[i]):
+            for j in problem.row_far[i]:
+                row_ind = problem.row_tree.index[i]
+                col_ind = problem.col_tree.index[j]
+                #print(row_basis[i].shape, row_far[i][0].shape, row_basis[j].shape)
+                F = list_row_basis[i] @ list_far[i][0] @ list_col_basis[j].T
+                M_h2[np.ix_(row_ind, col_ind)] = F
+
+                #F_verif = A[np.ix_(row_ind, col_ind)]
+                #print('Erreur locale :', np.linalg.norm(F - F_verif) / np.linalg.norm(F), '\n')
+    
+    C0 = init_C0(N, problem)
+    M_h2 += C0 
+    return M_h2
 
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 10
+    N = 2 ** 5
     ndim = 1
     position = np.linspace(0, 1, N).reshape(ndim, N)
     #position = np.random.randn(ndim, N)
-    L = 3
-    tau = 1e-8
+    L = 4
+    tau = 1e-3
     block_size = N // (2 ** L)
 
     func = particles.inv_distance
@@ -359,8 +379,8 @@ if __name__ == '__main__':
     print(70 * '-', '\n')
     
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
-    #A_h2.svdcompress(tau = 1e-2)
-    M_h2 = np.zeros(A_h2.shape)
+    A_h2.svdcompress(tau = 1e-2)
+    
     row_far = A_h2.row_interaction
     col_far = A_h2.col_interaction
 
@@ -369,31 +389,20 @@ if __name__ == '__main__':
     col_transfer = A_h2.col_transfer
 
     row_basis = init_vect_base(problem, row_transfer)
-    row_basis.insert(0, [])
+    col_basis = init_vect_base(problem, col_transfer)
+    
+    M_h2 = build_A(problem, row_basis, col_basis, row_far)
 
     
-    for i in range(1, problem.row_tree.num_nodes):
-        print(f"Noeud n°{i}\n")
-        if (problem.row_far[i]):
-            for j in problem.row_far[i]:
-                row_ind = problem.row_tree.index[i]
-                col_ind = problem.col_tree.index[j]
-                #print(row_basis[i].shape, row_far[i][0].shape, row_basis[j].shape)
-                F = row_basis[i] @ row_far[i][0] @ row_basis[j].T
-                M_h2[np.ix_(row_ind, col_ind)] = F
+    
 
-                F_verif = A[np.ix_(row_ind, col_ind)]
-                print('Erreur locale :', np.linalg.norm(F - F_verif) / np.linalg.norm(F), '\n')
-    
-    
-    C0 = init_C0(N, problem)
-    M_h2 += C0       
+
     print(70 * '-', '\n')
     print(f"ERREUR H² : {A_h2.diffnorm()}\n")
-    print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A ) / np.linalg.norm(M_h2))
+    print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
     df = pd.DataFrame(A)
     #print(df)
     plt.imshow(A - M_h2)
     plt.colorbar()
-    plt.show()
+    #plt.show()
     

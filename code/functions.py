@@ -354,17 +354,35 @@ def build_A(problem, list_row_basis, list_col_basis, list_far):
     M_h2 += C0 
     return M_h2
 
+
+def init_pos_2D(N):
+
+    print("WARNING : The input N must be a perfect square")
+    N_x = int(np.sqrt(N))
+
+    x = np.linspace(0, 1, N_x)
+    grid = np.meshgrid(x, x)
+
+    position = np.array(grid).reshape(len(x) ** 2, -1).T
+    return position
+
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 5
+    N = (2 ** 4) ** 2
     ndim = 1
-    position = np.linspace(0, 1, N).reshape(ndim, N)
-    #position = np.random.randn(ndim, N)
-    L = 4
+    if ndim == 1:
+        position = np.linspace(0, 1, N).reshape(ndim, N)
+    elif ndim == 2:
+        position = init_pos_2D(N)
+    elif ndim == 3:
+        position = np.random.randn(ndim, N)
+    else :
+        raise ValueError('The dimension must be 1, 2 or 3')
+    
+    L = 1
     tau = 1e-3
     block_size = N // (2 ** L)
-
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
                                                full_matrix=True)
@@ -393,16 +411,12 @@ if __name__ == '__main__':
     
     M_h2 = build_A(problem, row_basis, col_basis, row_far)
 
-    
-    
-
-
     print(70 * '-', '\n')
     print(f"ERREUR H² : {A_h2.diffnorm()}\n")
     print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
-    df = pd.DataFrame(A)
-    #print(df)
-    plt.imshow(A - M_h2)
-    plt.colorbar()
-    #plt.show()
+
     
+
+
+
+   

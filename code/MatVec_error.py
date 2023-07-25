@@ -5,7 +5,7 @@ from scipy.sparse.linalg import LinearOperator
 from h2tools.collections import particles
 
 from h2tools.mcbh import mcbh
-from functions import init_particules_problem
+from functions import init_particules_problem, init_pos_2D
 
 
 if __name__ == "__main__":
@@ -14,17 +14,25 @@ if __name__ == "__main__":
     
     start = time.time()
     #N_vec = [2000, 3000, 4000, 5000]
-    N_vec = [50, 500, 1000, 5000]
+    N_vec = [100, 500, 1000, 2500]
     for N in N_vec:
         print("N =", N)
-        ndim = 2
-        count = N
-        position = np.random.randn(ndim, count)
-        block_size = 50
-
+        ndim = 3
+        if ndim == 1:
+            position = np.linspace(0, 1, N).reshape(ndim, N)
+        elif ndim == 2:
+            position = init_pos_2D(N)
+        elif ndim == 3:
+            position = np.random.randn(ndim, N)
+        else :
+            raise ValueError('The dimension must be 1, 2 or 3')
         
+        L = 2
+        tau = 1e-3
+        block_size = N // (2 ** L)
         func = particles.inv_distance
-        problem, L, A = init_particules_problem(position, func, block_size, full_matrix=True)
+        problem, L, A = init_particules_problem(position, func, block_size=block_size, 
+                                                full_matrix=True)
         
         
 
@@ -49,7 +57,7 @@ if __name__ == "__main__":
         
         print(f"Temps d'exécution : {time.time() - start}")
         
-        if N == 5000 :
+        if N == 2500 :
             plt.loglog(X_err, X_err, ls=':', label='Slope 1')
             # plt.loglog(X_err, np.sqrt(X_err), ls=':', label='Slope 1/2' )
         plt.loglog(X_err, Y_err_dot, label=f"N={N}", linewidth=2)

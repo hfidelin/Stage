@@ -10,6 +10,7 @@ from functions import init_particules_problem
 from h2tools.mcbh import mcbh
 from h2tools.collections import particles
 from scipy.sparse import csc_matrix
+import pandas as pd
 from functions import *
 
 
@@ -18,14 +19,25 @@ from functions import *
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 5
+    N = 2 ** 4
     ndim = 1
-    position = np.linspace(0, 1, N).reshape(ndim, N)
-    #position = np.random.randn(ndim, N)
-    L = 4
+    if ndim == 1:
+        position = np.linspace(0, 1, N).reshape(ndim, N)
+    elif ndim == 2:
+        position = init_pos_2D(N)
+    elif ndim == 3:
+        position = np.random.randn(ndim, N)
+    else :
+        raise ValueError('The dimension must be 1, 2 or 3')
     
-    tau = 1e-3
+    L = 1
+    
+    tau = 1e-1
+    
     block_size = N // (2 ** L)
+
+    if block_size == 0 :
+        raise ValueError(f"The depth L is is giving a block size of {block_size}")
 
     func = particles.inv_distance
     problem, L, A = init_particules_problem(position, func, block_size=block_size, 
@@ -53,30 +65,63 @@ if __name__ == '__main__':
     
     
     print(70 * '-', '\n')
+    
+    vect_U = []
+    vect_V = []
+    vect = [block_size * (2 **l) for l in range(L)]
+
+    
+    for l in vect:
+        
+        shape = (l, l)
+        vect_l = []
+        for j in range(1, len(row_basis)):
+            base = row_basis[j]
+            if base.shape[0] == shape[0]:
+                vect_l.append(base) 
+        U = init_U0(N, vect_l, l)
+        V = init_V0(N, vect_l, l) 
+        
+        vect_U.append(U)
+        vect_V.append(V)
+
+
+    for inter in A_h2.row_interaction:
+        print(inter, '\n')
+
+    C0 = init_C0(N, problem)
+
+    U0 = vect_U[0].todense()
+    V0 = vect_V[0].todense()
+    A1 = U0.T @ A @ V0
+    print(70 * '-', '\n')
+    plt.imshow(A1)
+    plt.colorbar()
+    plt.show()
+    print(70 * '-', '\n')
+    #print(type(A_h2.row_basis))
+
+    """
+    
+    
+    
+    
     vect_U = []
     vect_V = []
     for l in reversed(range (1, L + 1)):
-        print(f"Level : {L + 1 - l}")
         shape = (2 ** l, 2 ** l)
-        print(f"Block shape : {shape}")
         vect_l = []
         for j in range(1, len(row_basis)):
             base = row_basis[j]
             if base.shape[0] == shape[0]:
                 vect_l.append(base) 
         U = init_U0(N, vect_l, 2 ** l)
-        V = init_V0(N, vect_l, 2 ** l)
+        V = init_V0(N, vect_l, 2 ** l) 
         
         vect_U.append(U)
         vect_V.append(V)
     
-
-    A_h2 = la.LinearOperator((N, N), matvec=A_h2.dot, rmatvec=A_h2.rdot)
+    for mat in vect_U:
+        print(pd.DataFrame(mat.todense()), '\n')
     
-    A1 = vect_U[-1].T @ A_h2.matmat(vect_V[-1].todense())
-    plt.imshow(A1)
-    plt.colorbar()
-    plt.show()
-    
-    
-        
+    """

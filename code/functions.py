@@ -139,28 +139,13 @@ def init_C0(N, problem, plot=False):
     Renvoie la matrice close C0
     """
 
-    func = problem.func
-    row = problem.row_tree
-    row_close = problem.row_close
-    col = problem.col_tree
-    row_size = row.level[-1]
-    
-    
-    vect_row = []
-    vect_col = []
-    vect_val = []
-
-    for i in range(row_size):
-        for j in range(len(row_close[i])):
-            k = row_close[i][j]
-                
-            tmp_matrix = func(row.index[i], col.index[k])
-            extract_close(row, col, i, k, tmp_matrix, 
-                              vect_row, vect_col, vect_val)
-              
-            
-    
-    C0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
+    C0 = lil_matrix((N, N))
+    for i in range(problem.row_tree.num_nodes):
+        if (problem.row_close[i]):
+            for j in problem.row_close[i]:
+                row_vect = problem.row_tree.index[i]
+                col_vect = problem.row_tree.index[j]
+                C0[np.ix_(row_vect, col_vect)] = problem.func(row_vect, col_vect)
     
     if plot :
         plt.spy(C0.toarray())
@@ -335,8 +320,8 @@ def init_vect_base(problem, list_transfer):
     
     return vect_base
     
-def build_A(problem, list_row_basis, list_col_basis, list_far):
-    M_h2 = np.zeros(A_h2.shape)
+def build_A(N, problem, list_row_basis, list_col_basis, list_far):
+    M_h2 = np.zeros((N, N))
     for i in range(1, problem.row_tree.num_nodes):
         #print(f"Noeud n°{i}\n")
         if (problem.row_far[i]):
@@ -380,7 +365,7 @@ if __name__ == '__main__':
     else :
         raise ValueError('The dimension must be 1, 2 or 3')
     
-    L = 1
+    L = 2
     tau = 1e-3
     block_size = N // (2 ** L)
     func = particles.inv_distance
@@ -395,7 +380,11 @@ if __name__ == '__main__':
     print(f'\nDEPTH \t=\t{L}')
     print(f'\nTAU \t=\t{tau}')
     print(70 * '-', '\n')
+
+    A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
+
     
+    """
     A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2
     A_h2.svdcompress(tau = 1e-2)
     
@@ -409,12 +398,112 @@ if __name__ == '__main__':
     row_basis = init_vect_base(problem, row_transfer)
     col_basis = init_vect_base(problem, col_transfer)
     
-    M_h2 = build_A(problem, row_basis, col_basis, row_far)
+    M_h2 = build_A(N, problem, row_basis, col_basis, row_far)
 
     print(70 * '-', '\n')
     print(f"ERREUR H² : {A_h2.diffnorm()}\n")
     print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
+    
+    vect_X = []
+    vect_spec = []
+    vect_recon = []
+    eps = 1e-5
+    for i in range(7, 14):
+        if np.sqrt(2**i) == np.floor(np.sqrt(2**i)):
+            N = 2 ** i
+            print(f"N = {N}")
+            ndim = 2
+            if ndim == 1:
+                position = np.linspace(0, 1, N).reshape(ndim, N)
+            elif ndim == 2:
+                position = init_pos_2D(N)
+            elif ndim == 3:
+                position = np.random.randn(ndim, N)
+            else :
+                raise ValueError('The dimension must be 1, 2 or 3')
+            L = 3
+            tau = 1e-8
+            block_size = N // (2 ** L)
+            func = particles.inv_distance
+            problem, L, A = init_particules_problem(position, func, block_size=block_size, 
+                                                    full_matrix=True)
+            A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2         
 
+            row_far = A_h2.row_interaction
+            col_far = A_h2.col_interaction
+
+            row_transfer = A_h2.row_transfer
+            col_transfer = A_h2.col_transfer
+
+            row_basis = init_vect_base(problem, row_transfer)
+            col_basis = init_vect_base(problem, col_transfer)  
+
+            M_h2 = build_A(N, problem, row_basis, col_basis, row_far) 
+
+            vect_X.append(N)
+            vect_spec.append(A_h2.diffnorm())
+            vect_recon.append(np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
+            print(f"ERREUR H² : {A_h2.diffnorm()}\n")
+            print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
+            print(70 * '-', '\n')
+        
+    plt.loglog(vect_X, vect_spec, label="Erreur H2tools")
+    plt.loglog(vect_X, vect_recon, label="Erreur rebuild")
+    plt.legend()
+    plt.grid()
+    plt.show()
+        
+        
+
+
+
+    
+            
+    
+    for i in range(3, 14):
+        N = 2 ** i
+        print(f"N = {N}")
+        ndim = 2
+        if ndim == 1:
+            position = np.linspace(0, 1, N).reshape(ndim, N)
+        elif ndim == 2:
+            position = init_pos_2D(N)
+        elif ndim == 3:
+            position = np.random.randn(ndim, N)
+        else :
+            raise ValueError('The dimension must be 1, 2 or 3')
+        L = 3
+        tau = 1e-8
+        block_size = N // (2 ** L)
+        func = particles.inv_distance
+        problem, L, A = init_particules_problem(position, func, block_size=block_size, 
+                                                full_matrix=True)
+        A_h2 = mcbh(problem, tau=tau, iters=1, verbose=0)  #Matrice H2         
+
+        row_far = A_h2.row_interaction
+        col_far = A_h2.col_interaction
+
+        row_transfer = A_h2.row_transfer
+        col_transfer = A_h2.col_transfer
+
+        row_basis = init_vect_base(problem, row_transfer)
+        col_basis = init_vect_base(problem, col_transfer)  
+
+        M_h2 = build_A(N, problem, row_basis, col_basis, row_far) 
+
+        vect_X.append(N)
+        vect_spec.append(A_h2.diffnorm())
+        vect_recon.append(np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
+        print(f"ERREUR H² : {A_h2.diffnorm()}\n")
+        print("Norme de la reconstruction : ", np.linalg.norm(M_h2 - A) / np.linalg.norm(M_h2))
+        print(70 * '-', '\n')
+    
+    plt.loglog(vect_X, vect_spec, label="Erreur H2tools")
+    plt.loglog(vect_X, vect_recon, label="Erreur rebuild")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    """ 
     
 
 

@@ -20,7 +20,7 @@ from functions import *
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 3
+    N = 2 ** 9
     ndim = 1
     if ndim == 1:
         position = np.linspace(0, 1, N).reshape(ndim, N)
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     else :
         raise ValueError('The dimension must be 1, 2 or 3')
     
-    L = 1
+    L = 2
     
     tau = 1e-1
     
@@ -53,23 +53,25 @@ if __name__ == '__main__':
     print(f'\nTAU \t=\t{tau}')
     print(70 * '-', '\n')
     
-    A_h2 = mcbh(problem, tau, iters=1, verbose=0 )
+    A_h2 = mcbh(problem, tau / 10, iters=1, verbose=0)
 
 
     print("PRÉ COMPRESSION\n")
 
     pre_row_transfer = A_h2.row_transfer
     pre_col_transfer = A_h2.col_transfer
-    
-    A_h2.svdcompress(tau, verbose=1)
+    A_h2.svdcompress(tau, verbose=0)
 
     post_row_transfer = A_h2.row_transfer
     post_col_transfer = A_h2.col_transfer
 
-    print("\nPOST COMPRESSION\n")
-    for pre_mat, post_mat in zip(pre_row_transfer, post_row_transfer):
-            if pre_mat is not None and post_mat is not None :
-                print(np.linalg.norm(pre_mat - post_mat), '\n')
+
+
+
+    for i in range(1, problem.row_tree.num_nodes):
+        a = 1
+        #print(f"Noeud n°{i}\n")
+        #print(pd.DataFrame(pre_row_transfer[i] @ pre_row_transfer[i].T), '\n')
 
     row_interact = A_h2.row_interaction
     col_interact = A_h2.col_interaction
@@ -79,12 +81,3 @@ if __name__ == '__main__':
 
     row_basis = init_vect_base(problem, row_transfer)
     col_basis = init_vect_base(problem, col_transfer)
-<<<<<<< HEAD
-    
-    
-    
-=======
-    
-    
-    
->>>>>>> 68b3608 (SVD compress does nothing)

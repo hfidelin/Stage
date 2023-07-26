@@ -22,7 +22,7 @@ import numpy as np
 # maximum size of leaf node of cluster trees (block_size) and
 # verbosity (verbose)
 ndim = 3
-count = 5000
+count = 500
 tau = 1e-5
 iters = 1
 onfly = 0
@@ -50,17 +50,14 @@ from h2tools.mcbh import mcbh
 
 # build approximation of the matrix with MCBH algorithm
 
-matrix = mcbh(problem, tau, iters=iters, onfly=onfly, verbose=verbose, random_init=random_init, mpi_comm=None)
-"""
-# check approximation error
-print(matrix.diffnorm(far_only=1))
+matrix = mcbh(problem, tau, iters=iters, onfly=onfly, verbose=0, random_init=random_init, mpi_comm=None)
 
+for i in range(problem.row_tree.num_levels):
+    T = matrix.row_transfer[i]
+    print(T)
 # Compress matrix
-matrix.svdcompress(1e-4, verbose=1)
-print(matrix.diffnorm(far_only=1))
+matrix.svdcompress(1e-4, verbose=0)
 
-matrix.svdcompress(1e-3, verbose=1)
-print(matrix.diffnorm(far_only=1))
-"""
 
-print(matrix)
+
+#print(matrix)

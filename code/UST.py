@@ -79,6 +79,12 @@ if __name__ == '__main__':
 
     row_basis = init_vect_base(problem, row_transfer)
     col_basis = init_vect_base(problem, col_transfer)
+<<<<<<< HEAD
     
     
     
+=======
+    
+    
+    
+>>>>>>> 68b3608 (SVD compress does nothing)

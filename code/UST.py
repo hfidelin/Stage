@@ -10,6 +10,7 @@ from functions import init_particules_problem
 from h2tools.mcbh import mcbh
 from h2tools.collections import particles
 from scipy.sparse import csc_matrix
+from scipy.sparse.linalg import LinearOperator
 import pandas as pd
 from functions import *
 
@@ -19,7 +20,7 @@ from functions import *
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 4
+    N = 2 ** 3
     ndim = 1
     if ndim == 1:
         position = np.linspace(0, 1, N).reshape(ndim, N)
@@ -51,9 +52,25 @@ if __name__ == '__main__':
     print(f'\nDEPTH \t=\t{L}')
     print(f'\nTAU \t=\t{tau}')
     print(70 * '-', '\n')
-
+    
     A_h2 = mcbh(problem, tau, iters=1, verbose=0 )
-    A_h2.svdcompress(tau)
+
+
+    print("PRÉ COMPRESSION\n")
+
+    pre_row_transfer = A_h2.row_transfer
+    pre_col_transfer = A_h2.col_transfer
+    
+    A_h2.svdcompress(tau, verbose=1)
+
+    post_row_transfer = A_h2.row_transfer
+    post_col_transfer = A_h2.col_transfer
+
+    print("\nPOST COMPRESSION\n")
+    for pre_mat, post_mat in zip(pre_row_transfer, post_row_transfer):
+            if pre_mat is not None and post_mat is not None :
+                print(np.linalg.norm(pre_mat - post_mat), '\n')
+
     row_interact = A_h2.row_interaction
     col_interact = A_h2.col_interaction
 
@@ -64,64 +81,4 @@ if __name__ == '__main__':
     col_basis = init_vect_base(problem, col_transfer)
     
     
-    print(70 * '-', '\n')
     
-    vect_U = []
-    vect_V = []
-    vect = [block_size * (2 **l) for l in range(L)]
-
-    
-    for l in vect:
-        
-        shape = (l, l)
-        vect_l = []
-        for j in range(1, len(row_basis)):
-            base = row_basis[j]
-            if base.shape[0] == shape[0]:
-                vect_l.append(base) 
-        U = init_U0(N, vect_l, l)
-        V = init_V0(N, vect_l, l) 
-        
-        vect_U.append(U)
-        vect_V.append(V)
-
-
-    for inter in A_h2.row_interaction:
-        print(inter, '\n')
-
-    C0 = init_C0(N, problem)
-
-    U0 = vect_U[0].todense()
-    V0 = vect_V[0].todense()
-    A1 = U0.T @ A @ V0
-    print(70 * '-', '\n')
-    plt.imshow(A1)
-    plt.colorbar()
-    plt.show()
-    print(70 * '-', '\n')
-    #print(type(A_h2.row_basis))
-
-    """
-    
-    
-    
-    
-    vect_U = []
-    vect_V = []
-    for l in reversed(range (1, L + 1)):
-        shape = (2 ** l, 2 ** l)
-        vect_l = []
-        for j in range(1, len(row_basis)):
-            base = row_basis[j]
-            if base.shape[0] == shape[0]:
-                vect_l.append(base) 
-        U = init_U0(N, vect_l, 2 ** l)
-        V = init_V0(N, vect_l, 2 ** l) 
-        
-        vect_U.append(U)
-        vect_V.append(V)
-    
-    for mat in vect_U:
-        print(pd.DataFrame(mat.todense()), '\n')
-    
-    """

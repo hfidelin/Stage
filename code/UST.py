@@ -20,7 +20,7 @@ from functions import *
 if __name__ == '__main__':
     
     start = time.time()
-    N = 2 ** 9
+    N = 2 ** 7
     ndim = 1
     if ndim == 1:
         position = np.linspace(0, 1, N).reshape(ndim, N)
@@ -31,9 +31,9 @@ if __name__ == '__main__':
     else :
         raise ValueError('The dimension must be 1, 2 or 3')
     
-    L = 2
+    L = 6
     
-    tau = 1e-1
+    tau = 1e-2
     
     block_size = N // (2 ** L)
 
@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
     pre_row_transfer = A_h2.row_transfer
     pre_col_transfer = A_h2.col_transfer
+    
     A_h2.svdcompress(tau, verbose=0)
 
     post_row_transfer = A_h2.row_transfer
@@ -69,7 +70,9 @@ if __name__ == '__main__':
 
 
     for i in range(1, problem.row_tree.num_nodes):
-        a = 1
+        T = post_row_transfer[i]
+        norm = np.linalg.norm(T @ T.T)
+        print(f"Noeud {i} : \t {norm}")
         #print(f"Noeud n°{i}\n")
         #print(pd.DataFrame(pre_row_transfer[i] @ pre_row_transfer[i].T), '\n')
 
@@ -81,3 +84,16 @@ if __name__ == '__main__':
 
     row_basis = init_vect_base(problem, row_transfer)
     col_basis = init_vect_base(problem, col_transfer)
+
+    row_leaf, col_leaf = init_list_leaf(row_transfer, col_transfer, Block_size=block_size)
+
+    k = 5
+
+    for b in row_basis:
+        print(b, '\n')
+    
+    U0 = init_Uk(N, row_basis, block_size, k)
+
+    plt.imshow(U0.todense())
+    plt.colorbar()
+    plt.show()

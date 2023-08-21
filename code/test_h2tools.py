@@ -21,14 +21,14 @@ import numpy as np
 # symmetricity of the problem (symmetric),
 # maximum size of leaf node of cluster trees (block_size) and
 # verbosity (verbose)
-ndim = 3
-count = 500
-tau = 1e-5
+ndim = 2
+count = 16
+tau = 1e-9
 iters = 1
 onfly = 0
 symmetric = 1
-block_size = 20
-verbose = 1
+block_size = 2
+verbose = 0
 random_init = 2
 
 func = particles.inv_distance
@@ -38,6 +38,7 @@ func = particles.inv_distance
 np.random.seed(0)
 # generate positions of particles in shape (ndim, count)
 position = np.random.randn(ndim, count)
+#position = np.linspace(0, 1, count).reshape(ndim, count)
 # create data object from given positions of particles
 data = particles.Particles(ndim, count, position)
 # initialize cluster tree from data object
@@ -52,12 +53,16 @@ from h2tools.mcbh import mcbh
 
 matrix = mcbh(problem, tau, iters=iters, onfly=onfly, verbose=0, random_init=random_init, mpi_comm=None)
 
-for i in range(problem.row_tree.num_levels):
-    T = matrix.row_transfer[i]
-    print(T)
 # Compress matrix
-matrix.svdcompress(1e-4, verbose=0)
+matrix.svdcompress(1e-2, verbose=0)
 
 
 
+for i in range(problem.row_tree.num_nodes):
+    T = matrix.row_transfer[i]
+    print(f"Noeud n°{i}\n")
+    try :
+        print(np.linalg.norm(T @ T.T), '\n')
+    except:
+        print(f"Pas de matrice de transfert\n")
 #print(matrix)

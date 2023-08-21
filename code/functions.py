@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy as sp
 import scipy.sparse.linalg as la
 from h2tools import ClusterTree
 from h2tools import Problem
@@ -242,47 +243,48 @@ def init_list_leaf(row_transfer, col_transfer, Block_size):
     return row_leaf, col_leaf
 
 
-def init_U0(N, row_leaf, Block_size):
-    
-    vect_row = []
-    vect_col = []
-    vect_val = []
+def init_Uk(N, row_basis, Block_size, k):
 
-    B = len(row_leaf)
-    for i in range(B):
-        Block = row_leaf[i].T
-        #print('BLOCK :\n', Block, '\n')
+    diag = []
+
+    B = len(row_basis)
+    for i in range(1, B):
+        Block = row_basis[i].T
         I, J = Block.shape
-        for ii in range(I):
-            for jj in range(J):
-                val = Block[ii,jj]
-                r = i * Block_size + ii
-                c = i * Block_size + jj
-                add_sp_list(vect_row, vect_col, vect_val, r, c, val)
+        if J == Block_size ** (k + 1):
+
+            max_size = max(Block.shape)
+            
+            square_block = np.zeros((max_size, max_size))
+
+            square_block[:Block.shape[0], :Block.shape[1]] = Block 
+
+            diag.append(square_block)
+
+    Uk = sp.sparse.block_diag(diag)
+    return Uk
         
-    U0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
-    return U0
-        
 
-def init_V0(N, col_leaf, Block_size):
+def init_Vk(N, row_basis, Block_size, k):
 
-    vect_row = []
-    vect_col = []
-    vect_val = []
+    diag = []
 
-    B = len(col_leaf)
-    for i in range(B):
-        Block = col_leaf[i]
+    B = len(row_basis)
+    for i in range(1, B):
+        Block = row_basis[i]
         I, J = Block.shape
-        for ii in range(I):
-            for jj in range(J):
-                val = Block[ii,jj]
-                r = i * Block_size + ii
-                c = i * Block_size + jj
-                add_sp_list(vect_row, vect_col, vect_val, r, c, val)
-        
-    V0 = csc_matrix((vect_val, (vect_row, vect_col)), shape=(N, N))
-    return V0
+        if I == Block_size ** (k + 1):
+
+            max_size = max(Block.shape)
+            
+            square_block = np.zeros((max_size, max_size))
+
+            square_block[:Block.shape[0], :Block.shape[1]] = Block 
+
+            diag.append(square_block)
+
+    Vk = sp.sparse.block_diag(diag)
+    return Vk
         
 
 

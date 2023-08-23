@@ -16,7 +16,8 @@ except:
 import scipy.sparse.linalg as la
 from sys import getsizeof
 from .mpi_misc import sync_mpi_data
-from solver import direct_solver, gmres_solver
+import os
+from .solver import direct_solver, gmres_solver, inv_precond
 
 __all__ = ['H2matrix']
 
@@ -1872,9 +1873,32 @@ class H2matrix(object):
         x_gmres : ndarray,
             approximation of the solution of Ax=b 
         """
+        print("GMRES appelé")
         mv = self.dot
         rmv = self.rdot
         linop = la.LinearOperator(self.shape, matvec=mv, rmatvec=rmv)
 
-        x_gmres = gmres_solver(linop, b, eps, M)
+        x_gmres = gmres_solver(linop, b, eps, M=M)
+        print("GMRES renvoi effectué")
         return x_gmres
+    
+    def precond(self, tau):
+        """
+        Compute linear operator P^⁻1 or P is the preconditionner of A using the
+        sparse factorization from direct solver
+
+        Parameter
+        ----------
+        tau : float
+            recompression parameter
+
+        Return 
+        ----------
+        inv_P : linear operator
+        """
+        print("Class appelée")
+        self.svdcompress(tau)
+        inv_P = inv_precond(self)
+        print(f"Class renvoie effectué")
+        return inv_P
+    

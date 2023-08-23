@@ -1,11 +1,8 @@
 import time
 import numpy as np
 import scipy.sparse as sp
-from h2_to_sparse import convert_h2_to_sparse
+from .h2_to_sparse import convert_h2_to_sparse
 
-from h2tools.collections import particles
-# import main container for problem and cluster tree
-from h2tools import Problem, ClusterTree
 
 
 
@@ -54,10 +51,21 @@ def direct_solver(h2_matrix, b):
     return x
 
 
-def gmres_solver(h2_matrix, b, eps, M):
+def gmres_solver(h2_matrix, b, eps, M=None):
     
     N = h2_matrix.shape[0]
     restart = int(N / 2)
     x, info = sp.linalg.gmres(h2_matrix, b, tol=eps,restart=restart, maxiter=300, M=M )
     return x
+
+def inv_precond(h2_matrix):
+    print("Solver appelé")
+    S, U, V = sparse_matrix(h2_matrix)
+
+    P = U @ S @ V
+    print(f"TYPE DE P : {type(P)}")
+    Px = lambda x : sp.linalg.spsolve(P, x)
+    P_linop = sp.linalg.LinearOperator(P.shape, Px)
+    print("Solveur renvoi effectué")
+    return P_linop
 

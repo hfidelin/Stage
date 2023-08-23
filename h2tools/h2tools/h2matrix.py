@@ -16,6 +16,7 @@ except:
 import scipy.sparse.linalg as la
 from sys import getsizeof
 from .mpi_misc import sync_mpi_data
+from solver import direct_solver, gmres_solver
 
 __all__ = ['H2matrix']
 
@@ -1826,3 +1827,54 @@ class H2matrix(object):
                     mem[4], mem[0], mem[1], mem[2], mem[3])
         np.set_printoptions(**old_printoptions)
         return out
+    
+    
+    def solve(self, b):
+        """
+        Approximation the solution x for the linear proble Ax=b where A is H² 
+        matrix
+
+        Use a direct solver that approximate A with a product of sparse and
+        orthogonal matrices.
+
+        Parameter
+        ---------
+        b : ndarray
+            source vector of the linear problem
+
+        Return:
+
+        x_h2 : ndarray,
+            approximation of the solution of Ax=b 
+        """
+        return direct_solver(self, b)
+    
+    def solve_gmres(self, b, eps, M=None):
+        """
+        Approximation the solution x for the linear proble Ax=b where A is H² 
+        matrix
+
+        Use a GMRES alogithm from Scipy to approximate the solution x.
+
+        Parameter
+        ---------
+        b : ndarray
+            source vector of the linear problem
+        
+        eps : float
+            tolerance for GMRES convergence
+        
+        M : ndarray, matrix, linear operator
+            inverse of the precondition of A. Set to None by default
+
+        Return:
+
+        x_gmres : ndarray,
+            approximation of the solution of Ax=b 
+        """
+        mv = self.dot
+        rmv = self.rdot
+        linop = la.LinearOperator(self.shape, matvec=mv, rmatvec=rmv)
+
+        x_gmres = gmres_solver(linop, b, eps, M)
+        return x_gmres

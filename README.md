@@ -13,6 +13,7 @@ Afin d'utiliser, les fichiers de ce dépôt GitHub, voilà un rapide tutoriel po
 Nous recommendons vivement l'utilisation de $pip$ (https://pip.pypa.io/en/stable/installation/) pour l'installation des packages suivant :
  
 * numpy
+* matplotlib
 * numba
 * scipy
 * cython

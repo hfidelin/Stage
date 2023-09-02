@@ -1,9 +1,12 @@
+"""
+This file print the matrix-vector product error for different value of tau and
+different size of matrix N
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 from scipy.sparse.linalg import LinearOperator
 from h2tools.collections import particles
-
 from h2tools.mcbh import mcbh
 from functions import init_particules_problem, init_pos_2D
 
@@ -13,7 +16,6 @@ if __name__ == "__main__":
     np.random.seed(0)
     
     start = time.time()
-    #N_vec = [2000, 3000, 4000, 5000]
     N_vec = [100, 500, 1000, 2500]
     for N in N_vec:
         print("N =", N)
@@ -27,11 +29,11 @@ if __name__ == "__main__":
         else :
             raise ValueError('The dimension must be 1, 2 or 3')
         
-        L = 2
+        L = 6
         tau = 1e-3
         block_size = N // (2 ** L)
         func = particles.inv_distance
-        problem, L, A = init_particules_problem(position, func, block_size=block_size, 
+        problem, A = init_particules_problem(position, func, block_size=block_size, 
                                                 full_matrix=True)
         
         
@@ -51,7 +53,6 @@ if __name__ == "__main__":
             
 
             res_h2 = A_h2.dot(X)
-            #print(np.linalg.norm(res ), np.linalg.norm(res_h2), "\n")
             err_dot = np.linalg.norm(res - res_h2)
             Y_err_dot.append(err_dot)
         
@@ -59,7 +60,6 @@ if __name__ == "__main__":
         
         if N == 2500 :
             plt.loglog(X_err, X_err, ls=':', label='Slope 1')
-            # plt.loglog(X_err, np.sqrt(X_err), ls=':', label='Slope 1/2' )
         plt.loglog(X_err, Y_err_dot, label=f"N={N}", linewidth=2)
         plt.title(f"Erreur produit matrice-vecteur, dimension = {ndim}")
         plt.xlabel(r"Valeurs de $\tau$")

@@ -6,6 +6,8 @@ from __future__ import print_function, absolute_import, division
 
 from time import time
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.sparse import lil_matrix
 from maxvolpy.maxvol import maxvol_svd, maxvol_qr
 from .problem import Problem
 import copy
@@ -17,7 +19,8 @@ import scipy.sparse.linalg as la
 from sys import getsizeof
 from .mpi_misc import sync_mpi_data
 import os
-from .solver import direct_solver, gmres_solver, inv_precond
+from .solver import direct_solver, gmres_solver
+
 
 __all__ = ['H2matrix']
 
@@ -1873,32 +1876,31 @@ class H2matrix(object):
         x_gmres : ndarray,
             approximation of the solution of Ax=b 
         """
-        print("GMRES appelé")
         mv = self.dot
         rmv = self.rdot
         linop = la.LinearOperator(self.shape, matvec=mv, rmatvec=rmv)
 
         x_gmres = gmres_solver(linop, b, eps, M=M)
-        print("GMRES renvoi effectué")
         return x_gmres
     
-    def precond(self, tau):
+    def close_matrix(self, plot=False):
         """
-        Compute linear operator P^⁻1 or P is the preconditionner of A using the
-        sparse factorization from direct solver
-
-        Parameter
-        ----------
-        tau : float
-            recompression parameter
-
-        Return 
-        ----------
-        inv_P : linear operator
+        Return the close matrix is sparse csc format
+        The argument "plot" indicate if the function plots the skeleton of the
+        close matrix.
         """
-        print("Class appelée")
-        self.svdcompress(tau)
-        inv_P = inv_precond(self)
-        print(f"Class renvoie effectué")
-        return inv_P
-    
+        problem = self.problem
+        C0 = lil_matrix((N, N))
+        for i in range(problem.row_tree.num_nodes):
+            if (problem.row_close[i]):
+                for j in problem.row_close[i]:
+                    row_vect = problem.row_tree.index[i]
+                    col_vect = problem.row_tree.index[j]
+                    C0[np.ix_(row_vect, col_vect)] = problem.func(row_vect, col_vect)
+        
+        if plot :
+            plt.spy(C0.toarray())
+            plt.title(f"Squelette de $C$ pour $N={N}$")
+            plt.show()
+        
+        return C0.tocsc()

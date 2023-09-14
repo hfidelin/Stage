@@ -36,7 +36,7 @@ def sparse_matrix(h2_matrix):
     row_tree = h2_matrix.problem.row_tree
     level_count = len(row_tree.level)-1
 
-    S, U, V = convert_h2_to_sparse(h2_matrix)
+    S, U, V = convert_h2_to_sparse(h2_matrix, check_error=True, show_process=True)
 
     S = S.res
 
@@ -45,7 +45,8 @@ def sparse_matrix(h2_matrix):
 
     for j in range(level_count - 1):
         U_mat = U_mat.dot(U[j])
-        V_mat = V_mat.dot(V[j])
+        # V_mat = V_mat.dot(V[j])
+        V_mat = V[j].dot(V_mat)
     
     
 

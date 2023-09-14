@@ -42,7 +42,7 @@ if __name__ == "__main__":
                                             full_matrix=True)
         
         A_h2 = mcbh(problem, tau, iters=1, verbose=0) #H² matrix
-
+        A_h2.svdcompress(tau, verbose=False)
         b = np.random.randn(N) #random vector for linear system
 
         x = A_h2.solve(b)
@@ -50,8 +50,11 @@ if __name__ == "__main__":
         x_ref = np.linalg.solve(A, b)
 
         err_direct = np.linalg.norm(x_ref - x)
+        print('Erreur solveur direct : '+str(err_direct))
         err_gmres = np.linalg.norm(x_ref - x_gmres)
+        print('Erreur solveur direct : '+str(err_gmres))
         err_h2 = A_h2.diffnorm()[0]
+        print('Erreur solveur direct : '+str(err_h2))
 
         X.append(tau)
 

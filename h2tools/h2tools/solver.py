@@ -111,7 +111,7 @@ def gmres_solver(h2_matrix, b, eps=1e-5, M=None):
     count = gmres_counter()
     N = h2_matrix.shape[0]
     restart = int(N / 2)
-    x, info = sp.linalg.gmres(h2_matrix, b, tol=eps,restart=restart, maxiter=300, M=M, callback=count )
+    x, info = sp.linalg.gmres(h2_matrix, b, rtol=eps,restart=restart, maxiter=300, M=M, callback=count )
     return x
 
 """

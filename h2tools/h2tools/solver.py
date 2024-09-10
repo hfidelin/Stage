@@ -45,7 +45,6 @@ def sparse_matrix(h2_matrix):
 
     for j in range(level_count - 1):
         U_mat = U_mat.dot(U[j])
-        # V_mat = V_mat.dot(V[j])
         V_mat = V[j].dot(V_mat)
     
     

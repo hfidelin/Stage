@@ -20,7 +20,7 @@ if __name__ == "__main__":
     block_size = 50
     func = particles.inv_distance
 
-
+    # tau_vect = [1e-6, 1e-3, 1e-1]
     tau_vect = [1e-11, 1e-9, 1e-6, 1e-3, 1e-1]
     X = []
     Y_direct = []
@@ -52,9 +52,9 @@ if __name__ == "__main__":
         err_direct = np.linalg.norm(x_ref - x)
         print('Erreur solveur direct : '+str(err_direct))
         err_gmres = np.linalg.norm(x_ref - x_gmres)
-        print('Erreur solveur direct : '+str(err_gmres))
+        print('Erreur solveur gmres : '+str(err_gmres))
         err_h2 = A_h2.diffnorm()[0]
-        print('Erreur solveur direct : '+str(err_h2))
+        print('Erreur compression H2 : '+str(err_h2))
 
         X.append(tau)
 
